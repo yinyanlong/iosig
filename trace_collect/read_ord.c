@@ -26,6 +26,7 @@ int MPI_File_read_ordered(MPI_File mpi_fh, void *buf, int count,
     iorec->data_size = count * dtsize;
     iorec->op_time = tv;
     iorec->operation = MPI_READORD;
+
     log_read_trace(iorec);
     PushIO_RTB_log(thisrank, iorec);
 /* end of add. by huaiming */
@@ -97,3 +98,4 @@ int MPI_File_read_ordered(MPI_File mpi_fh, void *buf, int count,
     /* FIXME: Check for error code from ReadStridedColl? */
     return error_code;
 }
+

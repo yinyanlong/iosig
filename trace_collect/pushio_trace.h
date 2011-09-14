@@ -44,6 +44,7 @@ typedef struct PushIO_Trace_record_t {
     long int file_pos;
     size_t data_size;
     struct timeval op_time;
+    struct timeval op_end_time;
     int operation;
 } PushIO_Trace_record;
 

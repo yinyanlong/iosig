@@ -16,6 +16,7 @@
  *            Initiates tracing.
  *
  * Modified on: 12/16/2009 by Huaiming Song
+ *              09/14/2011 by Yanlong Yin
  */
 
 #include "mpioimpl.h"
