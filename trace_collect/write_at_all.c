@@ -5,6 +5,7 @@
  *	Illinois Institute of Technology
  *	Scalable Computing Software Laboratory
  *
+ * Modified on: 09/14/2011 by Yanlong Yin
  */
 
 #include "mpioimpl.h"
@@ -17,22 +18,27 @@ int MPI_File_write_at_all(MPI_File mpi_fh, MPI_Offset offset, void *buf,
 {
     int ret_val;
     int dtsize;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
     iorec->file_pos = mpi_fh->fp_ind;
     MPI_Type_size(datatype, &dtsize);
     iorec->data_size = count * dtsize;
-    iorec->op_time = tv;
+    iorec->op_time = start;
     iorec->operation = MPI_WRITEALL;
-
-    log_read_trace(iorec);
-    PushIO_RTB_log(thisrank, iorec);
 
     ret_val =
 	PMPI_File_write_at_all(mpi_fh, offset, buf, count, datatype,
 			       status);
+
+    gettimeofday(&end, NULL);
+    iorec->op_end_time = end;
+
+    log_read_trace(iorec);
+    PushIO_RTB_log(thisrank, iorec);
+
     return ret_val;
 }
+

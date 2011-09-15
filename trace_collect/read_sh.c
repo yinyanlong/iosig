@@ -5,6 +5,8 @@
  *	Illinois Institute of Technology
  *	Scalable Computing Software Laboratory
  *
+ * Modified on: 09/14/2011 by Yanlong Yin
+ *
  */
 #include "mpioimpl.h"
 #include "mpiimpl.h"
@@ -15,18 +17,16 @@ int MPI_File_read_shared(MPI_File mpi_fh, void *buf, int count,
 {
 /* add by huaiming */
     int dtsize;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
     iorec->file_pos = mpi_fh->fp_ind;
     MPI_Type_size(datatype, &dtsize);
     iorec->data_size = count * dtsize;
-    iorec->op_time = tv;
+    iorec->op_time = start;
     iorec->operation = MPI_READSH;
-    log_read_trace(iorec);
-    PushIO_RTB_log(thisrank, iorec);
 /* end of add. by huaiming */
 
     int error_code, bufsize, buftype_is_contig, filetype_is_contig;
@@ -107,6 +107,12 @@ int MPI_File_read_shared(MPI_File mpi_fh, void *buf, int count,
 	/* For strided and atomic mode, locking is done in ADIO_ReadStrided */
     }
 
+    gettimeofday(&end, NULL);
+    iorec->op_end_time = end;
+
+    log_read_trace(iorec);
+    PushIO_RTB_log(thisrank, iorec);
+
     /* --BEGIN ERROR HANDLING-- */
     if (error_code != MPI_SUCCESS)
 	error_code = MPIO_Err_return_file(fh, error_code);
@@ -118,3 +124,4 @@ int MPI_File_read_shared(MPI_File mpi_fh, void *buf, int count,
 
     return error_code;
 }
+

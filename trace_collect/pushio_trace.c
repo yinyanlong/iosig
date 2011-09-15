@@ -13,6 +13,7 @@
  *                                       RTB is 1024 for each process. When the
  *                                       limit is reached, overflowing traces are
  *                                       kept in a file corresponding to that process.
+ *              09/14/2011 by Yanlong Yin Added the end time of each operation to trace.
  *
  * Funded by:   NSF, Award # CCF-0621435
  *
@@ -54,7 +55,7 @@ void init_log()
 	exit(1);
     } else {
 	fprintf(out_fp,
-		"\nProc ID  MPI_Rank   File #     File Pos \t # of Bytes \t Time(s)     I/O Op\n");
+		"\nProc ID  MPI_Rank   File #     File Pos \t # of Bytes \t Time(s)     I/O Op   EndTime(s)\n");
 	fprintf(out_fp,
 		"===================================================================================== \n");
     }
@@ -74,7 +75,7 @@ void end_log()
 /* write log information into a file  */
 void log_read_trace(PushIO_Trace_record * pushio_rec)
 {
-    struct timeval difftv;
+    struct timeval diffstart, diffend;
     char operation[15];
     int rank;
     if (!out_fp) {
@@ -88,7 +89,8 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
 
 	gettimeofday(&init_tv, NULL);
     }
-    timeval_diff(&difftv, &(pushio_rec->op_time), &init_tv);
+    timeval_diff(&diffstart, &(pushio_rec->op_time), &init_tv);
+    timeval_diff(&diffend, &(pushio_rec->op_end_time), &init_tv);
 
     /* find MPI_rank information  */
     if (!pushio_rec->is_mpi_operation) {
@@ -99,10 +101,11 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
 
     get_operation(operation, pushio_rec->operation);
 
-    fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %s\n",
+    fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %s   %6ld.%06ld\n",
 	    getpid(), rank, pushio_rec->filedes, pushio_rec->file_pos,
-	    pushio_rec->data_size, (long) difftv.tv_sec,
-	    (long) difftv.tv_usec, operation);
+	    pushio_rec->data_size, (long) diffstart.tv_sec,
+	    (long) diffstart.tv_usec, operation, (long)diffend.tv_sec,
+            (long) diffend.tv_usec);
     return;
 }
 
@@ -459,3 +462,4 @@ void get_operation(char *operation, int rec_operation)
 	break;
     }
 }
+

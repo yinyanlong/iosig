@@ -38,3 +38,4 @@ install: trace
 clean::
 	rm -f *.o
 	rm -rf libpushio.a
+

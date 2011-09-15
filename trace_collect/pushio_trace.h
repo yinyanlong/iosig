@@ -9,6 +9,7 @@
  * Created on:  03/04/2007
  * Modified on: 03/16/2007 by Suren Byna
  *		03/26/2007 by Suren Byna, to add RTB
+ *              09/14/2011 by Yanlong Yin, to add op_end_time
  *
  * Funded by:   NSF, Award # CCF-0621435
  *
@@ -117,3 +118,4 @@ void get_operation(char *operation, int rec_operation);
 #define CLOSE 		205
 
 #endif
+

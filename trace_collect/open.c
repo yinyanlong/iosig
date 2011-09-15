@@ -16,6 +16,7 @@
  *            Initiates tracing.
  *
  * Modified on: 12/16/2009 by Huaiming Song
+ *              09/14/2011 by Yanlong Yin
  */
 
 #include "mpioimpl.h"
@@ -26,20 +27,24 @@ int MPI_File_open(MPI_Comm comm, char *filename, int amode,
 		  MPI_Info info, MPI_File * fh)
 {
     int ret_val;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = 0;		/*  THIS HAS TO BE FIXED   */
     iorec->data_size = 0;
-    iorec->op_time = tv;
+    iorec->op_time = start;
     iorec->operation = MPI_OPEN;
 
     ret_val = PMPI_File_open(comm, filename, amode, info, fh);
 
     iorec->file_pos = 0;
+    gettimeofday(&end, NULL);
+    iorec->op_end_time = end;
+
     log_read_trace(iorec);
     PushIO_RTB_log(thisrank, iorec);
 
     return ret_val;
 }
+
