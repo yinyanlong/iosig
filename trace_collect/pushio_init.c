@@ -5,6 +5,7 @@
  *      Illinois Institute of Technology
  *      Scalable Computing Software Laboratory
  *
+ * Modified on: 09/20/2011 by Yanlong Yin
  */
 
 #include "mpi.h"

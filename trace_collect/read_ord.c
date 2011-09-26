@@ -37,7 +37,13 @@ int MPI_File_read_ordered(MPI_File mpi_fh, void *buf, int count,
     ADIO_File fh;
 
     MPIU_THREAD_CS_ENTER(ALLFUNC,);
+#ifdef MPICH2_NUMVERSION
+#if MPICH2_NUMVERSION < 10300000 /* Nesting is different for 1.3 or newer
+                                    version of MPICH2 */ 
     MPIR_Nest_incr();
+#else
+#endif
+#endif
 
     fh = MPIO_File_resolve(mpi_fh);
 
@@ -97,7 +103,13 @@ int MPI_File_read_ordered(MPI_File mpi_fh, void *buf, int count,
     PushIO_RTB_log(thisrank, iorec);
 
   fn_exit:
+#ifdef MPICH2_NUMVERSION
+#if MPICH2_NUMVERSION < 10300000 /* Nesting is different for 1.3 or newer
+                                    version of MPICH2 */ 
     MPIR_Nest_decr();
+#else
+#endif
+#endif
     MPIU_THREAD_CS_EXIT(ALLFUNC,);
 
     /* FIXME: Check for error code from ReadStridedColl? */

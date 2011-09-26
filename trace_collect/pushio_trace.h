@@ -21,7 +21,6 @@
 #ifndef PUSHIO_TRACE_H
 #define PUSHIO_TRACE_H
 
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

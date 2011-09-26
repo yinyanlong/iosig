@@ -22,6 +22,7 @@
 #include "mpioimpl.h"
 #include "mpiimpl.h"
 #include "pushio_trace.h"
+#include <stdio.h>
 
 int MPI_File_open(MPI_Comm comm, char *filename, int amode,
 		  MPI_Info info, MPI_File * fh)
