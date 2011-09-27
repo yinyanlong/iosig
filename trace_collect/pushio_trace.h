@@ -43,9 +43,9 @@ typedef struct PushIO_Trace_record_t {
     int filedes;
     long int file_pos;
     size_t data_size;
+    int operation;
     struct timeval op_time;
     struct timeval op_end_time;
-    int operation;
 } PushIO_Trace_record;
 
 /* declare pointers to IO Request Trace Buffers.

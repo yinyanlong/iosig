@@ -101,7 +101,7 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
 
     get_operation(operation, pushio_rec->operation);
 
-    fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %s   %6ld.%06ld\n",
+    fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %20s   %6ld.%06ld\n",
 	    getpid(), rank, pushio_rec->filedes, pushio_rec->file_pos,
 	    pushio_rec->data_size, (long) diffstart.tv_sec,
 	    (long) diffstart.tv_usec, operation, (long)diffend.tv_sec,
