@@ -1,11 +1,34 @@
-# compile the library
-# modify following two variants in Makefile
-MPIPATH         = /your/path/to/mpich2-1.4 # also works with older
-                                           # version of MPICH2 like
-					   # 1.3.1 or 1.1.1
-INSTALL_DIR     = /your/path/to/mpich2-install/lib
+==========
+CHANGE LOG
+==========
 
-# compile mpi program using the collecting trace library
-  add -liosig flags to compile command
+The following changes are newly added to this version.
+
+- The library now works with all recent release of MPICH2, from mpich2-1.1.1p1
+  to mpich2-1.4.1p1.
+- For each operation, the finish time is also traced.
+
+==========
+TO COMPILE
+==========
+
+Modify following two variants in Makefile.
+
+    MPIPATH         = /your/path/to/mpich2-1.4 
+    INSTALL_DIR     = /your/path/to/mpich2-install/lib
+
+Then, make.
+
+    $ make
+    $ make install
+
+==================
+TO USE THE LIBRARY
+==================
+
+Compile mpi program using the collecting trace library by adding
+ '-liosig' flags to compile command.
 eg: mpicc -o test_mpiio test_mpiio.c  -liosig
+
+Or add '-L/your/path/to/mpich2-install/lib -liosig' if the path cannot be found by 'make'.
 
