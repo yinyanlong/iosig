@@ -31,7 +31,7 @@ from prop import *
 from util import *
 
 # the following parameters can be specified by user's command line arguments
-_range = 5000      # the number of accesses will be processed
+_range = 50000     # the number of accesses will be processed
 _blksz = 0         # the block size - minimal cache unit
 _debug = 0
 _format_file = "standard.properties"

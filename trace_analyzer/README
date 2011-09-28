@@ -1,5 +1,14 @@
-How to use the program
-==
+============
+CHANGE LOG
+============
+
+1. Includ the operation finish time into analysis, allow the value to be zero.
+2. Generate figures showing the ratio of I/O time and execution time. 
+
+============
+INSTALLATION
+============
+
 1. Compile the program
 $ make
 
@@ -7,3 +16,4 @@ $ make
 $ ./detect_iosig
 
 Then following the help information and user's guide ().
+

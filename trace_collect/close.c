@@ -26,8 +26,7 @@
 int MPI_File_close(MPI_File * fh)
 {
     int ret_val;
-    struct timeval start;
-    struct timeval end;
+    struct timeval start, end;
     gettimeofday(&start, NULL);
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;

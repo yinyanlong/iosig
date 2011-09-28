@@ -8,9 +8,9 @@ http://www.cs.iit.edu/~scs/SIG/sig.html for the latest version.
 """
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
-__version__ = "$Revision: 1.0$"
-__date__ = "$Date: 02/11/2010 01:09:23 $"
-__copyright__ = "Copyright (c) 2010 SCS IIT"
+__version__ = "$Revision: 1.4$"
+__date__ = "$Date: 09/28/2011 01:09:23 $"
+__copyright__ = "Copyright (c) 2010-2011 SCS IIT"
 __license__ = "Python"
 
 import sys
@@ -19,11 +19,14 @@ import sig
 class Access:
     def __init__(self, value=[]):
         if sig._format_prop == None:
-            self.mpi_rank = int(value[-6])
-            self.file_id = int(value[-5])
+            self.mpi_rank = int(value[1])
+            self.file_id = int(value[2])
+            self.size = int(value[4])
+            self.pos = int(value[3])
+            self.op = value[6]
+            self.startTime = double(value[5])
+            self.endTime = double(value[7])
             if sig._blksz > 0:
-                self.size = int(value[-3])
-                self.pos = int(value[-4])
                 blkId = self.pos/sig._blksz
                 filepos = blkId * sig._blksz
                 filepos2 = ((filepos + self.size)/sig._blksz)*sig._blksz
@@ -31,21 +34,13 @@ class Access:
                     filepos2 += sig._blksz
                 self.size = filepos2 - filepos
                 self.pos = filepos
-            elif sig._blksz == 0:
-                self.pos = int(value[-4])
-                self.size = int(value[-3])
-#            if value[-1].count('W') or value[-1].count('w'):
-#                self.op = 'WRITE'
-#            elif value[-1].count('R') or value[-1].count('r'):
-#                self.op = 'READ'
-            self.op = value[ int(sig._format_prop['op']) ]
         else:
             self.mpi_rank = int(value[ int(sig._format_prop['mpi_rank']) ])
             if  int(sig._format_prop['file_id']) >= 0:
                 self.file_id = int(value[ int(sig._format_prop['file_id']) ])
+            self.size = int(value[ int(sig._format_prop['size']) ])
+            self.pos = int(value[ int(sig._format_prop['pos']) ])
             if sig._blksz > 0:
-                self.size = int(value[ int(sig._format_prop['size']) ])
-                self.pos = int(value[ int(sig._format_prop['pos']) ])
                 blkId = self.pos/sig._blksz
                 filepos = blkId * sig._blksz
                 filepos2 = ((filepos + self.size)/sig._blksz)*sig._blksz
@@ -53,9 +48,6 @@ class Access:
                     filepos2 += sig._blksz
                 self.size = filepos2 - filepos
                 self.pos = filepos
-            elif sig._blksz == 0:
-                self.size = int(value[ int(sig._format_prop['size']) ])
-                self.pos = int(value[ int(sig._format_prop['pos']) ])
             if value[ int(sig._format_prop['op']) ].count('W') or value[ int(sig._format_prop['op']) ].count('w'):
                 self.op = 'WRITE'
             elif value[ int(sig._format_prop['op']) ].count('r') or value[ int(sig._format_prop['op']) ].count('R'):

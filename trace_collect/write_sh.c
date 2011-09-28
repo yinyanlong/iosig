@@ -5,6 +5,8 @@
  *	Illinois Institute of Technology
  *	Scalable Computing Software Laboratory
  *
+ * Modified on 09/28/2011 by Yanlong Yin.
+ *
  */
 
 #include "mpioimpl.h"
@@ -17,18 +19,16 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
 
 /* add by huaiming*/
     int dtsize;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
+    struct timeval start, end;
+    gettimeofday(&start, NULL);
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
     iorec->file_pos = mpi_fh->fp_ind;
     MPI_Type_size(datatype, &dtsize);
     iorec->data_size = count * dtsize;
-    iorec->op_time = tv;
+    iorec->op_time = start;
     iorec->operation = MPI_WRITESH;
-    log_read_trace(iorec);
-    PushIO_RTB_log(thisrank, iorec);
 /* end of add, by huaiming*/
 
     int error_code, bufsize, buftype_is_contig, filetype_is_contig;
@@ -117,5 +117,13 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
   fn_exit:
     MPIR_Nest_decr();
     MPIU_THREAD_CS_EXIT(ALLFUNC,);
+
+    gettimeofday(&end, NULL);
+    iorec->op_end_time = end;
+
+    log_read_trace(iorec);
+    PushIO_RTB_log(thisrank, iorec);
+
     return error_code;
 }
+
