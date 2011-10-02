@@ -558,7 +558,7 @@ class AccList(list):
     def makeup_output(self, path):
         """Generate the fancy output in HTML page"""
 
-        debugPrint("Generating the fancy webpage output")
+        debugPrint("Generating webpage output")
 
         self.max_pos = self[0].pos
         self.min_pos = self.max_pos
@@ -640,3 +640,11 @@ class AccList(list):
         f.write(fullPage.make())
                 
         
+    def gen_timefig(self, path):
+        """Generate the time figure"""
+
+        debugPrint("Generating the time figure")
+
+        
+
+

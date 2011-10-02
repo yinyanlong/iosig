@@ -37,6 +37,7 @@ _debug = 0
 _format_file = "standard.properties"
 _format_prop = None
 _protobuf = 0
+_out_dir = "./analysis_output"
 
 # usage
 def usage():
@@ -95,6 +96,7 @@ def main(argv):
     # the list contains all the accesses
     rlist = AccList()
     wlist = AccList()
+    accList = AccList()
 
     # open the trace file
     f = open(filename, 'r')
@@ -129,18 +131,19 @@ def main(argv):
 
         ## save to list
         op = words[op_index].upper();
-        if op.count('READ')>0 or op == 'R':
-            acc = Access(words)
-            rlist.append(acc)
+        acc = Access(words)
+        accList.append(acc)
 
+        if op.count('READ')>0 or op == 'R':
+            rlist.append(acc)
         if op.count('WRITE')>0 or op == 'W':
-            acc = Access(words)
             wlist.append(acc)
 
     ## close the opened file
     f.close()
     rlist.trace = filename
     wlist.trace = filename
+    accList.trace = filename
 
     ## print the list
     #for i in acc_list:
@@ -165,6 +168,9 @@ def main(argv):
         wlist.print_signature()
         wlist.gen_protobuf("./makeup_output")
         wlist.makeup_output("./makeup_output")
+
+    if len(accList) > 0:
+        accList.gen_timefig("./makeup_output")
 
 if __name__ == '__main__':
     main(sys.argv[1:])
