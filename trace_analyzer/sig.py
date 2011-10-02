@@ -19,7 +19,7 @@ Options:
 """
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
-__version__ = "$Revision: 1.3.2$"
+__version__ = "$Revision: 1.4$"
 __date__ = "$Date: 10/03/2011 18:03:33 $"
 __copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
 __license__ = "Python"
