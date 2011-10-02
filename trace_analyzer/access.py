@@ -26,33 +26,27 @@ class Access:
             self.op = value[6]
             self.startTime = double(value[5])
             self.endTime = double(value[7])
-            if sig._blksz > 0:
-                blkId = self.pos/sig._blksz
-                filepos = blkId * sig._blksz
-                filepos2 = ((filepos + self.size)/sig._blksz)*sig._blksz
-                if filepos2 < (filepos+self.size):
-                    filepos2 += sig._blksz
-                self.size = filepos2 - filepos
-                self.pos = filepos
         else:
             self.mpi_rank = int(value[ int(sig._format_prop['mpi_rank']) ])
             if  int(sig._format_prop['file_id']) >= 0:
                 self.file_id = int(value[ int(sig._format_prop['file_id']) ])
             self.size = int(value[ int(sig._format_prop['size']) ])
             self.pos = int(value[ int(sig._format_prop['pos']) ])
-            if sig._blksz > 0:
-                blkId = self.pos/sig._blksz
-                filepos = blkId * sig._blksz
-                filepos2 = ((filepos + self.size)/sig._blksz)*sig._blksz
-                if filepos2 < (filepos+self.size):
-                    filepos2 += sig._blksz
-                self.size = filepos2 - filepos
-                self.pos = filepos
-            if value[ int(sig._format_prop['op']) ].count('W') or value[ int(sig._format_prop['op']) ].count('w'):
-                self.op = 'WRITE'
-            elif value[ int(sig._format_prop['op']) ].count('r') or value[ int(sig._format_prop['op']) ].count('R'):
-                self.op = 'READ'
+            self.startTime = double(value[int(sig._format_prop['start_time']])
+            self.endTime = double(value[int(sig._format_prop['end_time']])
+            #if value[ int(sig._format_prop['op']) ].count('W') or value[ int(sig._format_prop['op']) ].count('w'):
+            #    self.op = 'WRITE'
+            #elif value[ int(sig._format_prop['op']) ].count('r') or value[ int(sig._format_prop['op']) ].count('R'):
+            #    self.op = 'READ'
             self.op = value[ int(sig._format_prop['op']) ]
+        if sig._blksz > 0:
+            blkId = self.pos/sig._blksz
+            filepos = blkId * sig._blksz
+            filepos2 = ((filepos + self.size)/sig._blksz)*sig._blksz
+            if filepos2 < (filepos+self.size):
+                filepos2 += sig._blksz
+            self.size = filepos2 - filepos
+            self.pos = filepos
 
     def __repr__(self):
         format = 'Pos: %d, Size: %d, Op: %s.'
