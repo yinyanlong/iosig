@@ -4,13 +4,13 @@
 Define the data structure of access entry .
 
 This program is part of the "I/O Signature detection software". Visit 
-http://www.cs.iit.edu/~scs/SIG/sig.html for the latest version.
+http://www.cs.iit.edu/~scs/iosig for the latest version.
 """
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
 __version__ = "$Revision: 1.4$"
 __date__ = "$Date: 09/28/2011 01:09:23 $"
-__copyright__ = "Copyright (c) 2010-2011 SCS IIT"
+__copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
 __license__ = "Python"
 
 import sys
@@ -32,8 +32,8 @@ class Access:
                 self.file_id = int(value[ int(sig._format_prop['file_id']) ])
             self.size = int(value[ int(sig._format_prop['size']) ])
             self.pos = int(value[ int(sig._format_prop['pos']) ])
-            self.startTime = double(value[int(sig._format_prop['start_time']])
-            self.endTime = double(value[int(sig._format_prop['end_time']])
+            self.startTime = double(value[int(sig._format_prop['start_time'])])
+            self.endTime = double(value[int(sig._format_prop['end_time'])])
             #if value[ int(sig._format_prop['op']) ].count('W') or value[ int(sig._format_prop['op']) ].count('w'):
             #    self.op = 'WRITE'
             #elif value[ int(sig._format_prop['op']) ].count('r') or value[ int(sig._format_prop['op']) ].count('R'):

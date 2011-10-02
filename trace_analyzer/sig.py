@@ -20,8 +20,8 @@ Options:
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
 __version__ = "$Revision: 1.3.2$"
-__date__ = "$Date: 03/02/2011 18:08 $"
-__copyright__ = "Copyright (c) 2010-2011 SCS IIT"
+__date__ = "$Date: 10/03/2011 18:03:33 $"
+__copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
 __license__ = "Python"
 
 import sys, os, string, getopt
@@ -37,7 +37,7 @@ _debug = 0
 _format_file = "standard.properties"
 _format_prop = None
 _protobuf = 0
-_out_dir = "./analysis_output"
+_out_path = "./analysis_output"
 
 # usage
 def usage():
@@ -90,8 +90,11 @@ def main(argv):
         print "Using trace file: " + filename
     else:
         print '\033[1;41mSorry, trace file \''+filename+'\' does not exist!\033[1;m'
-
         sys.exit()
+
+    if not os.path.isdir(_out_path):
+        print "Output put directory does not exist, create it."
+        os.makedirs(_out_path)
 
     # the list contains all the accesses
     rlist = AccList()
@@ -161,16 +164,16 @@ def main(argv):
 
     if len(rlist.signatures) > 0:
         rlist.print_signature()
-        rlist.gen_protobuf("./makeup_output")
-        rlist.makeup_output("./makeup_output")
+        rlist.gen_protobuf(_out_path)
+        rlist.makeup_output(_out_path)
 
     if len(wlist.signatures) > 0:
         wlist.print_signature()
-        wlist.gen_protobuf("./makeup_output")
-        wlist.makeup_output("./makeup_output")
+        wlist.gen_protobuf(_out_path)
+        wlist.makeup_output(_out_path)
 
     if len(accList) > 0:
-        accList.gen_timefig("./makeup_output")
+        accList.gen_timefig(_out_path)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

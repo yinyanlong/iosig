@@ -5,13 +5,13 @@ Define the class of AccList, which contains all the access entries and detect
 signatures among them.
 
 This program is part of the "I/O Signature detection software". Visit 
-http://www.cs.iit.edu/~scs/SIG/sig.html for the latest version.
+http://www.cs.iit.edu/~scs/iosig for the latest version.
 """
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
-__version__ = "$Revision: 1.2$"
-__date__ = "$Date: 11/30/2010 01:09:23 $"
-__copyright__ = "Copyright (c) 2010 SCS IIT"
+__version__ = "$Revision: 1.4$"
+__date__ = "$Date: 10/02/2011 18:09:23 $"
+__copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
 __license__ = "Python"
 
 import sys
@@ -565,7 +565,11 @@ class AccList(list):
         self.max_size = self[0].size
         self.min_size = self.max_size
 
+        # draw the figure of position
+        x = range(len(self))
+        y = []
         for i in self:
+            y.append(i.pos)
             if self.min_pos > i.pos:
                 self.min_pos = i.pos
             if self.max_pos < i.pos:
@@ -574,12 +578,6 @@ class AccList(list):
                 self.min_size = i.size
             if self.max_size < i.size:
                 self.max_size = i.size
-
-        # draw the figure of position
-        x = range(len(self))
-        y = []
-        for i in self:
-            y.append(i.pos)
         
         plt.xlabel('access')
         plt.ylabel('access offset')
@@ -589,7 +587,7 @@ class AccList(list):
         plt.plot(x, y, 'r.')
         #plt.grid(True)
 
-        plt.savefig("./makeup_output/pos.png")
+        plt.savefig(path+"/pos.png")
         plt.cla()
 
         # draw the figure of size
@@ -606,7 +604,7 @@ class AccList(list):
         plt.plot(x, y, 'r.')
         #plt.grid(True)
 
-        plt.savefig("./makeup_output/size.png")
+        plt.savefig(path+"/size.png")
 
         # generate the html output file
         pageTitle = 'I/O Signature Information'
@@ -636,10 +634,9 @@ class AccList(list):
         fullPage.addPiece(pageHead)
         fullPage.addPiece(pageBody)
 
-        f = open('./makeup_output/sig.html', 'w')
+        f = open(path+'/sig.html', 'w')
         f.write(fullPage.make())
-                
-        
+
     def gen_timefig(self, path):
         """Generate the time figure"""
 
