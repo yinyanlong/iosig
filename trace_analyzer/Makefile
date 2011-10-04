@@ -7,9 +7,9 @@ all: python
 python: detect_iosig
 
 clean:
-	rm -f detect_iosig
-	rm -f protoc_middleman signatureList.pb.cc signatureList.pb.h signatureList_pb2.py edu/iit/iosig/IOSignatureList.java
-	rm -f *.pyc
+	rm detect_iosig
+	rm protoc_middleman signatureList_pb2.py
+	rm *.pyc
 	rmdir edu/iit/iosig 2>/dev/null || true
 	rmdir edu/iit 2>/dev/null || true
 	rmdir edu 2>/dev/null || true
@@ -23,4 +23,7 @@ detect_iosig: sig.py protoc_middleman
 	@echo '#! /bin/sh' > detect_iosig
 	@echo 'python ./sig.py "$$@"' >> detect_iosig
 	@chmod +x detect_iosig
+
+test:
+	cp * -r /export/home/yyin/dev-test/iosig/trace_analyzer
 
