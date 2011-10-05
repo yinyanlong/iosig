@@ -1,8 +1,0 @@
-# compile the library
-# modify following two variants in Makefile
-MPIPATH         = /your/path/to/mpich2-1.4
-INSTALL_DIR     = /your/path/to/mpich2-install/lib
-
-# compile mpi program using the collecting trace library
-  add -liosig flags to compile command
-eg: mpicc -o test_mpiio test_mpiio.c  -liosig
