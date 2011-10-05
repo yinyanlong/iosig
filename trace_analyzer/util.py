@@ -25,3 +25,4 @@ def debugPrint(*args):
         info += str(i)
 
     print info
+

@@ -25,5 +25,9 @@ detect_iosig: sig.py protoc_middleman
 	@chmod +x detect_iosig
 
 test:
-	cp * -r /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp *.py /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp Makefile /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp *.properties /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp *.proto /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp README /export/home/yyin/dev-test/iosig/trace_analyzer
 

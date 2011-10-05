@@ -637,11 +637,12 @@ class AccList(list):
         f = open(path+'/sig.html', 'w')
         f.write(fullPage.make())
 
-    def gen_timefig(self, path):
-        """Generate the time figure"""
+    def gen_iorates(self, path):
+        """Generate the iorates figure"""
 
         debugPrint("Generating the time figure")
 
-        
+        plt.title('IO rates on time')
+         
 
 

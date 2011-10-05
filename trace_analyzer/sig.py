@@ -30,14 +30,23 @@ from accList import *
 from prop import *
 from util import *
 
+# global variables
+global _range         # the number of accesses will be processed
+global _blksz         # the block size - minimal cache unit
+global _debug
+global _format_file
+global _format_prop
+global _protobuf
+global _out_path
+
 # the following parameters can be specified by user's command line arguments
-_range = 50000     # the number of accesses will be processed
-_blksz = 0         # the block size - minimal cache unit
-_debug = 0
-_format_file = "standard.properties"
-_format_prop = None
-_protobuf = 0
-_out_path = "./analysis_output"
+sig._range = 50000
+sig._blksz = 0
+sig._debug = 0
+sig._format_file = "standard.properties"
+sig._format_prop = None
+sig._protobuf = 0
+sig._out_path = "./result_output"
 
 # usage
 def usage():
@@ -51,6 +60,7 @@ def main(argv):
         usage()
         sys.exit(2)
         
+    filename = ''
     # deal with command arguments
     try:
         opts, args = getopt.getopt(argv, "hdr:b:f:m:", ["help", "range=", "blksz=", "filename=", "formatFile="])
@@ -63,19 +73,15 @@ def main(argv):
             usage()
             sys.exit()
         elif opt in ("-d"):
-            global _debug
-            _debug = 1
+            sig._debug = 1
         elif opt in ("-p"):
-            global _protobuf
-            _protobuf = 1
+            sig._protobuf = 1
         elif opt in ("-f", "--filename"):
             filename = arg
         elif opt in ("-r", "--range"):
-            global _range
-            _range = int(arg)
+            sig._range = int(arg)
         elif opt in ("-b", "--blksz"):
-            global _blksz
-            _blksz = int(arg) * 1024
+            sig._blksz = int(arg) * 1024
             debugPrint( 'xxxxxxxxxx', sig._blksz)
         elif opt in ("-m", "--formatFile"):
             sig._format_file = arg
@@ -92,9 +98,9 @@ def main(argv):
         print '\033[1;41mSorry, trace file \''+filename+'\' does not exist!\033[1;m'
         sys.exit()
 
-    if not os.path.isdir(_out_path):
+    if not os.path.isdir(sig._out_path):
         print "Output put directory does not exist, create it."
-        os.makedirs(_out_path)
+        os.makedirs(sig._out_path)
 
     # the list contains all the accesses
     rlist = AccList()
@@ -115,7 +121,7 @@ def main(argv):
     op_index = int(sig._format_prop['op'])
     debugPrint ('op_index: ', op_index)
     op = ''
-    for i in range(_range):
+    for i in range(sig._range):
         line = f.readline()
         if not line:
             break
@@ -138,8 +144,11 @@ def main(argv):
         accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
+            debugPrint("one READ")
             rlist.append(acc)
+
         if op.count('WRITE')>0 or op == 'W':
+            debugPrint("one WRITE")
             wlist.append(acc)
 
     ## close the opened file
@@ -148,13 +157,15 @@ def main(argv):
     wlist.trace = filename
     accList.trace = filename
 
-    ## print the list
-    #for i in acc_list:
-    #print i
+    print 'Numbers of operations - ', 'Read: ', len(rlist), ' write: ', len(wlist)
+
+    #print the list
+    #for i in accList:
+    #   print i
 
     ## deal with the list
-    rlist.detect_signature(0, min(_range-j-1, len(rlist)-1) )
-    wlist.detect_signature(0, min(_range-j-1, len(wlist)-1) )
+    rlist.detect_signature(0, min(sig._range-j-1, len(rlist)-1) )
+    wlist.detect_signature(0, min(sig._range-j-1, len(wlist)-1) )
 
     ## Done with the whole process of detecting
     ## Print the whole signature
@@ -164,16 +175,16 @@ def main(argv):
 
     if len(rlist.signatures) > 0:
         rlist.print_signature()
-        rlist.gen_protobuf(_out_path)
-        rlist.makeup_output(_out_path)
+        rlist.gen_protobuf(sig._out_path)
+        rlist.makeup_output(sig._out_path)
 
     if len(wlist.signatures) > 0:
         wlist.print_signature()
-        wlist.gen_protobuf(_out_path)
-        wlist.makeup_output(_out_path)
+        wlist.gen_protobuf(sig._out_path)
+        wlist.makeup_output(sig._out_path)
 
     if len(accList) > 0:
-        accList.gen_timefig(_out_path)
+        accList.gen_iorates(sig._out_path)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

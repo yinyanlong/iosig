@@ -24,16 +24,16 @@ class Access:
             self.size = int(value[4])
             self.pos = int(value[3])
             self.op = value[6]
-            self.startTime = double(value[5])
-            self.endTime = double(value[7])
+            self.startTime = float(value[5])
+            self.endTime = float(value[7])
         else:
             self.mpi_rank = int(value[ int(sig._format_prop['mpi_rank']) ])
             if  int(sig._format_prop['file_id']) >= 0:
                 self.file_id = int(value[ int(sig._format_prop['file_id']) ])
             self.size = int(value[ int(sig._format_prop['size']) ])
             self.pos = int(value[ int(sig._format_prop['pos']) ])
-            self.startTime = double(value[int(sig._format_prop['start_time'])])
-            self.endTime = double(value[int(sig._format_prop['end_time'])])
+            self.startTime = float(value[int(sig._format_prop['start_time'])])
+            self.endTime = float(value[int(sig._format_prop['end_time'])])
             #if value[ int(sig._format_prop['op']) ].count('W') or value[ int(sig._format_prop['op']) ].count('w'):
             #    self.op = 'WRITE'
             #elif value[ int(sig._format_prop['op']) ].count('r') or value[ int(sig._format_prop['op']) ].count('R'):
