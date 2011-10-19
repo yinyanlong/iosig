@@ -20,6 +20,7 @@ import access
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.mlab as mlab
+#from matplotlib.pyplot import step, legend
 
 import makeHTML
 #import signatureList_pb2
@@ -642,7 +643,40 @@ class AccList(list):
 
         debugPrint("Generating the time figure")
 
+        plt.cla()
         plt.title('IO rates on time')
          
+        # get the x,y labels
+        read_time = []
+        read_rate = []
+        write_time = []
+        write_rate = []
+
+        endTime = 0
+        peakRate = 0
+ 
+        for i in self:
+            if i.endTime > endTime:
+                endTime = i.endTime
+            rate = i.size/(i.endTime-i.startTime)
+            if rate > peakRate:
+                peakRate = rate
+            if i.op.count('READ')>0 or i.op == 'R':
+                read_time.append(i.startTime) 
+                read_rate.append(rate)
+            if i.op.count('WRITE')>0 or i.op == 'W':
+                write_time.append(i.startTime) 
+                write_rate.append(rate)
+
+        # draw using 'step' function
+        plt.step(read_time, read_rate, label='read rates') 
+        plt.step(write_time, write_rate, label='write rates') 
+
+        plt.xlim(0, endTime) 
+        plt.ylim(0, peakRate*1.2)
+        plt.legend(loc=2)
+
+        plt.savefig(path+"/iorates.png")
+
 
 

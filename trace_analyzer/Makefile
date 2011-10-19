@@ -30,4 +30,5 @@ test:
 	cp *.properties /export/home/yyin/dev-test/iosig/trace_analyzer
 	cp *.proto /export/home/yyin/dev-test/iosig/trace_analyzer
 	cp README /export/home/yyin/dev-test/iosig/trace_analyzer
+	cp -r trace_samples /export/home/yyin/dev-test/iosig/trace_analyzer
 
