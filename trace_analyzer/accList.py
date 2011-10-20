@@ -678,5 +678,33 @@ class AccList(list):
 
         plt.savefig(path+"/iorates.png")
 
+    def gen_iorates2(self, path):
+        """Generate the iorates figure"""
 
+        debugPrint("Generating the time figure")
 
+        plt.cla()
+        plt.title('IO rates on time')
+
+        # get the x,y labels
+        read_time = []
+        read_rate = []
+        write_time = []
+        write_rate = []
+
+        endTime = 0
+        peakRate = 0
+        
+        i = 0
+        oprates = []
+        for i range(len(self)):
+            if i.endTime > endTime:
+                endTime = i.endTime
+            rate = i.size/(i.endTime-i.startTime)
+            if rate > peakRate:
+                peakRate = rate
+            if i.op.count('READ')>0 or i.op == 'R':
+
+            if i.op.count('WRITE')>0 or i.op == 'W':
+
+            
