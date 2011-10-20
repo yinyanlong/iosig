@@ -184,7 +184,7 @@ def main(argv):
         wlist.makeup_output(sig._out_path)
 
     if len(accList) > 0:
-        accList.gen_iorates(sig._out_path)
+        accList.gen_iorates2(sig._out_path)
 
 if __name__ == '__main__':
     main(sys.argv[1:])

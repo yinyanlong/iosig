@@ -695,16 +695,108 @@ class AccList(list):
         endTime = 0
         peakRate = 0
         
-        i = 0
-        oprates = []
-        for i range(len(self)):
-            if i.endTime > endTime:
-                endTime = i.endTime
-            rate = i.size/(i.endTime-i.startTime)
+        read_tuples = []
+        write_tuples = []
+        for i in range(len(self)):
+            acc = self[i]
+            if acc.endTime > endTime:
+                endTime = acc.endTime
+            rate = acc.size/(acc.endTime-acc.startTime)
             if rate > peakRate:
                 peakRate = rate
-            if i.op.count('READ')>0 or i.op == 'R':
+            oper = acc.startTime, acc.endTime, rate
+            if acc.op.count('READ')>0 or acc.op == 'R':
+                read_tuples.append(oper)
+            if acc.op.count('WRITE')>0 or acc.op == 'W':
+                write_tuples.append(oper)
 
-            if i.op.count('WRITE')>0 or i.op == 'W':
+        read_ops = get_rate_serie(read_tuples, 0, endTime)
+        write_ops = get_rate_serie(write_tuples, 0, endTime)
 
-            
+        for op in read_ops:
+            read_time.append(op[0])
+            read_rate.append(op[2])
+        for op in write_ops:
+            write_time.append(op[0])
+            write_rate.append(op[2])
+
+        print read_time
+        print read_rate
+        print write_time
+        print write_rate
+
+        # draw using 'step' function
+        plt.step(read_time, read_rate, where='post', label='read rates') 
+        plt.step(write_time, write_rate, where='post', label='write rates') 
+
+        plt.xlim(0, endTime) 
+        plt.ylim(0, peakRate*1.2)
+        plt.legend(loc=2)
+
+        plt.savefig(path+"/iorates.png")
+
+def get_rate_serie(op_tuples, start, end):
+    """ Get rate series from operation tuples """
+
+    original_tuples = sorted(op_tuples, key=lambda oper: oper[0])
+    original_length = len(original_tuples)
+    print 'sorted', original_tuples
+
+    new_tuples = []
+
+    while True:
+        
+        cursor = start
+        for i in range(original_length):
+            op = original_tuples[i]
+
+            if cursor < op[0]:
+                step = cursor, op[0], 0.0
+                new_tuples.append(step)
+                print "APPEND", step
+            cursor = op[0]
+        
+            if (i+1) < original_length:
+                next_op = original_tuples[i+1] 
+                if op[1] > next_op[0]:
+                    step = cursor, next_op[0], op[2]
+                    new_tuples.append(step)
+                    print "APPEND", step
+                    cursor = next_op[0]
+
+                    step = cursor, op[1], (op[2]+next_op[2])
+                    new_tuples.append(step)
+                    print "APPEND", step
+                else:
+                    step = cursor, op[1], op[2]
+                    new_tuples.append(step)
+                    print "APPEND", step
+                cursor = op[1]
+            else:
+                step = cursor, op[1], op[2]
+                new_tuples.append(step)
+                print "APPEND", step
+                cursor = op[1]
+
+        new_length = len(new_tuples)
+        if new_length == original_length:
+            if cursor < end:
+                step = cursor, end, 0
+                new_tuples.append(step)
+                print "APPEND", step
+            print 'series lenght: ', len(new_tuples)
+            return new_tuples
+
+        original_tuples = new_tuples
+        original_length = len(original_tuples)
+
+        new_tuples = []
+
+
+
+
+
+
+
+
+    
