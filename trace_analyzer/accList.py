@@ -644,47 +644,6 @@ class AccList(list):
         debugPrint("Generating the time figure")
 
         plt.cla()
-        plt.title('IO rates on time')
-         
-        # get the x,y labels
-        read_time = []
-        read_rate = []
-        write_time = []
-        write_rate = []
-
-        endTime = 0
-        peakRate = 0
- 
-        for i in self:
-            if i.endTime > endTime:
-                endTime = i.endTime
-            rate = i.size/(i.endTime-i.startTime)
-            if rate > peakRate:
-                peakRate = rate
-            if i.op.count('READ')>0 or i.op == 'R':
-                read_time.append(i.startTime) 
-                read_rate.append(rate)
-            if i.op.count('WRITE')>0 or i.op == 'W':
-                write_time.append(i.startTime) 
-                write_rate.append(rate)
-
-        # draw using 'step' function
-        plt.step(read_time, read_rate, label='read rates') 
-        plt.step(write_time, write_rate, label='write rates') 
-
-        plt.xlim(0, endTime) 
-        plt.ylim(0, peakRate*1.2)
-        plt.legend(loc=2)
-
-        plt.savefig(path+"/iorates.png")
-
-    def gen_iorates2(self, path):
-        """Generate the iorates figure"""
-
-        debugPrint("Generating the time figure")
-
-        plt.cla()
-        plt.title('IO rates on time')
 
         # get the x,y labels
         read_time = []
@@ -720,27 +679,27 @@ class AccList(list):
             write_time.append(op[0])
             write_rate.append(op[2])
 
-        print read_time
-        print read_rate
-        print write_time
-        print write_rate
-
         # draw using 'step' function
-        plt.step(read_time, read_rate, where='post', label='read rates') 
-        plt.step(write_time, write_rate, where='post', label='write rates') 
+        plt.step(read_time, read_rate, where='post', color='blue', label='read rates') 
+        plt.step(write_time, write_rate, where='post', color='red', label='write rates') 
 
-        plt.xlim(0, endTime) 
-        plt.ylim(0, peakRate*1.2)
+        print 'entTime: ', endTime
+        print 'peakRate: ', peakRate
+        plt.xlim(0, endTime*1.1) 
+        plt.ylim(0-peakRate*0.05, peakRate*1.2)
         plt.legend(loc=2)
+        plt.xlabel('Time (s)')
+        plt.ylabel('IO rates (Bytes/second)')
+        plt.title('IO rates on time')
+        plt.grid(True)
 
         plt.savefig(path+"/iorates.png")
 
 def get_rate_serie(op_tuples, start, end):
-    """ Get rate series from operation tuples """
+    """ Get rate series from list of operation tuples """
 
     original_tuples = sorted(op_tuples, key=lambda oper: oper[0])
     original_length = len(original_tuples)
-    print 'sorted', original_tuples
 
     new_tuples = []
 
@@ -753,7 +712,6 @@ def get_rate_serie(op_tuples, start, end):
             if cursor < op[0]:
                 step = cursor, op[0], 0.0
                 new_tuples.append(step)
-                print "APPEND", step
             cursor = op[0]
         
             if (i+1) < original_length:
@@ -761,21 +719,17 @@ def get_rate_serie(op_tuples, start, end):
                 if op[1] > next_op[0]:
                     step = cursor, next_op[0], op[2]
                     new_tuples.append(step)
-                    print "APPEND", step
                     cursor = next_op[0]
 
                     step = cursor, op[1], (op[2]+next_op[2])
                     new_tuples.append(step)
-                    print "APPEND", step
                 else:
                     step = cursor, op[1], op[2]
                     new_tuples.append(step)
-                    print "APPEND", step
                 cursor = op[1]
             else:
                 step = cursor, op[1], op[2]
                 new_tuples.append(step)
-                print "APPEND", step
                 cursor = op[1]
 
         new_length = len(new_tuples)
@@ -783,8 +737,9 @@ def get_rate_serie(op_tuples, start, end):
             if cursor < end:
                 step = cursor, end, 0
                 new_tuples.append(step)
-                print "APPEND", step
-            print 'series lenght: ', len(new_tuples)
+            step = new_tuples[-1][1], new_tuples[-1][1], 0
+            new_tuples.append(step)
+            
             return new_tuples
 
         original_tuples = new_tuples
