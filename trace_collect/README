@@ -12,10 +12,10 @@ The following changes are newly added to this version.
 TO COMPILE
 ==========
 
-Modify following two variants in Makefile.
+Modify following two variants in Makefile. 'MPIPATH' should be the path to the configured source code of MPICH2, and 'INSTALL_DIR' is recommended to set as the same path as the '--prefix' option used during MPICH2's configuration.
 
     MPIPATH         = /your/path/to/mpich2-1.4 
-    INSTALL_DIR     = /your/path/to/mpich2-install/lib
+    INSTALL_DIR     = /your/path/to/mpich2-install
 
 Then, make.
 

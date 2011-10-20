@@ -1,5 +1,5 @@
 MPIPATH		= /your/path/to/mpich2-1.4/
-INSTALL_DIR	= /your/path/to/mpich2-install/lib/
+INSTALL_DIR	= /your/path/to/mpich2-install/
 
 CXX		= gcc
 
@@ -11,6 +11,7 @@ DFLAGS		:= $(DFLAGS) -D_LARGEFILE64_SOURCE
 DFLAGS		:= $(DFLAGS) -D_FILE_OFFSET_BITS=64
 DFLAGS		:= $(DFLAGS) -DHAVE_ROMIOCONF_H
 
+CXXFLAGS	:= $(CXXFLAGS) -I${INSTALL_DIR}/include
 CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/binding/f77
 CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/ch3/include
 CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/common/datatype
@@ -33,7 +34,7 @@ trace: $(TRC_OBJS)
 	@echo "... compile comleted."
 
 install: trace
-	cp libiosig.a ${INSTALL_DIR}
+	cp libiosig.a ${INSTALL_DIR}/lib
 
 clean::
 	rm -f *.o
