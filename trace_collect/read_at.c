@@ -16,7 +16,7 @@
  *            Initiates tracing.
  *
  * Modified on: 12/16/2009 by Huaiming Song
- *              09/14/2011 by Yanlong Yin
+ *              11/21/2011 by Yanlong Yin
  */
 
 #include "mpioimpl.h"
@@ -33,7 +33,8 @@ int MPI_File_read_at(MPI_File mpi_fh, MPI_Offset offset, void *buf,
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
-    iorec->file_pos = mpi_fh->fp_ind;
+    //iorec->file_pos = mpi_fh->fp_ind;
+    iorec->file_pos = offset;
     MPI_Type_size(datatype, &dtsize);
     iorec->data_size = count * dtsize;
     iorec->op_time = start;

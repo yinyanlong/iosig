@@ -38,7 +38,8 @@ int MPI_File_seek(MPI_File mpi_fh, MPI_Offset offset, int whence)
 
     ret_val = PMPI_File_seek(mpi_fh, offset, whence);
 
-    iorec->file_pos = mpi_fh->fp_ind;
+    //iorec->file_pos = mpi_fh->fp_ind;
+    iorec->file_pos = offset;
 
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;

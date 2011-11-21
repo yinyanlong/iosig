@@ -34,7 +34,8 @@ int MPI_File_read_at_all(MPI_File mpi_fh, MPI_Offset offset, void *buf,
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
-    iorec->file_pos = mpi_fh->fp_ind;
+    //iorec->file_pos = mpi_fh->fp_ind;
+    iorec->file_pos = offset;
     MPI_Type_size(datatype, &dtsize);
     iorec->data_size = count * dtsize;
     iorec->op_time = start;
