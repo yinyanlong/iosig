@@ -599,7 +599,7 @@ class AccList(list):
         
         plt.xlabel('access')
         plt.ylabel('size of each access (byte)')
-        plt.title('pattern of access offset')
+        plt.title('pattern of access size')
 
         #plt.axis(1, len(x), self.min_pos, self.max_pos)
         plt.plot(x, y, 'r.')
@@ -620,14 +620,14 @@ class AccList(list):
 
         pageBody.addPart('h1', content="I/O Signatures")
 
-        sig_string = 'Trace Signature:'
+        sig_string = 'Trace Signature:\n'
         for i in self.signatures:
-            sig_string = sig_string + i.__repr__()
+            sig_string = sig_string + i.__repr__() + '\n'
         sig_string = sig_string +'.'
-        pageBody.addPart('p', content=sig_string)
+        pageBody.addPart('pre', content=sig_string)
 
         pageBody.addPart('h1', content="Pattern Figures")
-        fig_string = "<img src=\"./pos.png\"/> <img src=\"./size.png\"/>"
+        fig_string = "<img src=\"./pos.png\" width=450/> <img src=\"./size.png\" width=450/> <img src=\"./iorates.png\" width=450/>"
         pageBody.addPart('p', content=fig_string)
 
         pageBody.addPart('hr')

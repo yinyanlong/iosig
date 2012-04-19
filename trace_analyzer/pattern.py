@@ -131,7 +131,7 @@ class Signature(list):
         sig_value = (self.operation, self.initial_position, 
                      self.dimension, patterns_string, self.repetition)
         sig_string = sig_format % sig_value
-        sig_string = 'Type: ' + self.type + '\n' + 'Start(number of accesses): ' + str(self.start) + '        End(# of accesses): ' + str(self.end) + '\n' + 'Trace signatures: ' + str(sig_string)
+        sig_string = 'Type: ' + self.type + '\n' + 'Start(# of accesses): ' + str(self.start) + '        End(# of accesses): ' + str(self.end) + '\n' + 'Trace signatures: ' + str(sig_string)
 
         return sig_string
 
