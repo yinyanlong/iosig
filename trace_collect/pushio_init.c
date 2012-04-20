@@ -34,7 +34,7 @@ void mpi_init_ (int *ierr)
     //get command line arguments from main()
     getProcCmdLine(&argc, argv);
     ret_val = MPI_Init(&argc, (char ***)&argv);
-    
+
     *ierr = ret_val;
 }
 

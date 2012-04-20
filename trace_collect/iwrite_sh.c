@@ -14,9 +14,9 @@
 
 
 int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
-			   MPI_Datatype datatype, MPIO_Request * request)
+        MPI_Datatype datatype, MPIO_Request * request)
 {
-/* add by huaiming */
+    /* add by huaiming */
     int dtsize;
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -28,7 +28,7 @@ int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
     iorec->data_size = count * dtsize;
     iorec->op_time = start;
     iorec->operation = MPI_IWRITESH;
-/* end of add. by huaiming */
+    /* end of add. by huaiming */
 
     int error_code, bufsize, buftype_is_contig, filetype_is_contig;
     ADIO_File fh;
@@ -52,7 +52,7 @@ int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
 
     /* --BEGIN ERROR HANDLING-- */
     MPIO_CHECK_INTEGRAL_ETYPE(fh, count, datatype_size, myname,
-			      error_code);
+            error_code);
     MPIO_CHECK_FS_SUPPORTS_SHARED(fh, myname, error_code);
     MPIO_CHECK_COUNT_SIZE(fh, count, datatype_size, myname, error_code);
     /* --END ERROR HANDLING-- */
@@ -65,40 +65,40 @@ int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
     incr = (count * datatype_size) / fh->etype_size;
     ADIO_Get_shared_fp(fh, incr, &shared_fp, &error_code);
     if (error_code != MPI_SUCCESS) {
-	/* note: ADIO_Get_shared_fp should have set up error code already? */
-	MPIO_Err_return_file(fh, error_code);
+        /* note: ADIO_Get_shared_fp should have set up error code already? */
+        MPIO_Err_return_file(fh, error_code);
     }
 
     /* contiguous or strided? */
     if (buftype_is_contig && filetype_is_contig) {
-	/* convert sizes to bytes */
-	bufsize = datatype_size * count;
-	off = fh->disp + fh->etype_size * shared_fp;
-	if (!(fh->atomicity))
-	    ADIO_IwriteContig(fh, buf, count, datatype,
-			      ADIO_EXPLICIT_OFFSET, off, request,
-			      &error_code);
-	else {
-	    /* to maintain strict atomicity semantics with other concurrent                                                                                                                                                
-	       operations, lock (exclusive) and call blocking routine */
+        /* convert sizes to bytes */
+        bufsize = datatype_size * count;
+        off = fh->disp + fh->etype_size * shared_fp;
+        if (!(fh->atomicity))
+            ADIO_IwriteContig(fh, buf, count, datatype,
+                    ADIO_EXPLICIT_OFFSET, off, request,
+                    &error_code);
+        else {
+            /* to maintain strict atomicity semantics with other concurrent                                                                                                                                                
+               operations, lock (exclusive) and call blocking routine */
 
 
-	    if (fh->file_system != ADIO_NFS)
-		ADIOI_WRITE_LOCK(fh, off, SEEK_SET, bufsize);
+            if (fh->file_system != ADIO_NFS)
+                ADIOI_WRITE_LOCK(fh, off, SEEK_SET, bufsize);
 
-	    ADIO_WriteContig(fh, buf, count, datatype,
-			     ADIO_EXPLICIT_OFFSET, off, &status,
-			     &error_code);
+            ADIO_WriteContig(fh, buf, count, datatype,
+                    ADIO_EXPLICIT_OFFSET, off, &status,
+                    &error_code);
 
-	    if (fh->file_system != ADIO_NFS)
-		ADIOI_UNLOCK(fh, off, SEEK_SET, bufsize);
+            if (fh->file_system != ADIO_NFS)
+                ADIOI_UNLOCK(fh, off, SEEK_SET, bufsize);
 
-	    MPIO_Completed_request_create(&fh, bufsize, &error_code,
-					  request);
-	}
+            MPIO_Completed_request_create(&fh, bufsize, &error_code,
+                    request);
+        }
     } else
-	ADIO_IwriteStrided(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
-			   shared_fp, request, &error_code);
+        ADIO_IwriteStrided(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
+                shared_fp, request, &error_code);
 
     /* record the end time */
     gettimeofday(&end, NULL);
@@ -107,7 +107,7 @@ int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
     log_read_trace(iorec);
     PushIO_RTB_log(thisrank, iorec);
 
-  fn_exit:
+fn_exit:
     MPIR_Nest_decr();
     MPIU_THREAD_CS_EXIT(ALLFUNC,);
 
@@ -115,18 +115,18 @@ int MPI_File_iwrite_shared(MPI_File mpi_fh, void *buf, int count,
 }
 
 void mpi_file_iwrite_shared_(MPI_Fint *fh, void *buf, MPI_Fint *count,
-			     MPI_Fint *datatype, MPI_Fint *request, MPI_Fint *ierr){
+        MPI_Fint *datatype, MPI_Fint *request, MPI_Fint *ierr){
     MPI_File c_fh;
     MPI_Datatype c_datatype;
     MPI_Request c_request;
     int ret_val;
-    
+
     c_fh = MPI_File_f2c(*fh);
     c_datatype = MPI_Type_f2c(*datatype);
-    
+
     ret_val = MPI_File_iwrite_shared(c_fh, buf, *count, c_datatype,
-        &c_request);
-    
+            &c_request);
+
     if(ret_val == MPI_SUCCESS)
         *request = MPI_Request_c2f(c_request);
     *ierr = (MPI_Fint)ret_val;

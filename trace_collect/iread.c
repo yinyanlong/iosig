@@ -24,7 +24,7 @@
 #include "pushio_trace.h"
 
 int MPI_File_iread(MPI_File mpi_fh, void *buf, int count,
-		   MPI_Datatype datatype, MPI_Request * request)
+        MPI_Datatype datatype, MPI_Request * request)
 {
     int ret_val;
     int dtsize;
@@ -40,7 +40,7 @@ int MPI_File_iread(MPI_File mpi_fh, void *buf, int count,
     iorec->operation = MPI_IREAD;
 
     ret_val = PMPI_File_iread(mpi_fh, buf, count, datatype, request);
-    
+
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
 
@@ -55,12 +55,12 @@ void mpi_file_iread_(MPI_Fint *fh, void *buf, int *count, MPI_Fint *datatype, MP
     int ret_val;
     MPI_Datatype c_datatype;
     MPI_Request c_request;
-    
+
     c_fh = MPI_File_f2c(*fh);
     c_datatype = MPI_Type_f2c(*datatype);
-    
+
     ret_val = MPI_File_iread(c_fh, buf, *count, c_datatype, &c_request);
-    
+
     if(ret_val == MPI_SUCCESS)
         *request = MPI_Request_c2f(c_request);
     *ierr = (MPI_Fint)ret_val;

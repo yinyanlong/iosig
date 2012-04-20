@@ -460,7 +460,7 @@ void get_operation(char *operation, int rec_operation)
         default:
             sprintf(operation, "NOT KNOWN");
             break;
-   }
+    }
 }
 
 #define IOSIG_MAX_ARG_STRING_SIZE 4096

@@ -14,9 +14,9 @@
 #include "pushio_trace.h"
 
 int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
-			   MPI_Datatype datatype, MPI_Status * status)
+        MPI_Datatype datatype, MPI_Status * status)
 {
-/* add by huaiming */
+    /* add by huaiming */
     int dtsize;
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -28,7 +28,7 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
     iorec->data_size = count * dtsize;
     iorec->op_time = start;
     iorec->operation = MPI_WRITEORD;
-/* end of add. by huaiming */
+    /* end of add. by huaiming */
 
     int error_code, datatype_size, nprocs, myrank, incr;
     int source, dest;
@@ -51,7 +51,7 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
 
     /* --BEGIN ERROR HANDLING-- */
     MPIO_CHECK_INTEGRAL_ETYPE(fh, count, datatype_size, myname,
-			      error_code);
+            error_code);
     MPIO_CHECK_FS_SUPPORTS_SHARED(fh, myname, error_code);
     MPIO_CHECK_COUNT_SIZE(fh, count, datatype_size, myname, error_code);
     /* --END ERROR HANDLING-- */
@@ -66,27 +66,27 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
     source = myrank - 1;
     dest = myrank + 1;
     if (source < 0)
-	source = MPI_PROC_NULL;
+        source = MPI_PROC_NULL;
     if (dest >= nprocs)
-	dest = MPI_PROC_NULL;
+        dest = MPI_PROC_NULL;
     MPI_Recv(NULL, 0, MPI_BYTE, source, 0, fh->comm, MPI_STATUS_IGNORE);
 
     ADIO_Get_shared_fp(fh, incr, &shared_fp, &error_code);
 
     /* --BEGIN ERROR HANDLING-- */
     if (error_code != MPI_SUCCESS) {
-	error_code = MPIO_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL,
-					  myname, __LINE__, MPI_ERR_INTERN,
-					  "**iosharedfailed", 0);
-	error_code = MPIO_Err_return_file(fh, error_code);
-	goto fn_exit;
+        error_code = MPIO_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL,
+                myname, __LINE__, MPI_ERR_INTERN,
+                "**iosharedfailed", 0);
+        error_code = MPIO_Err_return_file(fh, error_code);
+        goto fn_exit;
     }
     /* --END ERROR HANDLING-- */
 
     MPI_Send(NULL, 0, MPI_BYTE, dest, 0, fh->comm);
 
     ADIO_WriteStridedColl(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
-			  shared_fp, status, &error_code);
+            shared_fp, status, &error_code);
 
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
@@ -96,10 +96,10 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
 
     /* --BEGIN ERROR HANDLING-- */
     if (error_code != MPI_SUCCESS)
-	error_code = MPIO_Err_return_file(fh, error_code);
+        error_code = MPIO_Err_return_file(fh, error_code);
     /* --END ERROR HANDLING-- */
 
-  fn_exit:
+fn_exit:
     MPIR_Nest_decr();
     MPIU_THREAD_CS_EXIT(ALLFUNC,);
 
@@ -108,15 +108,15 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
 }
 
 void mpi_file_write_ordered_(MPI_Fint *fh, void *buf, MPI_Fint *count,
-		     MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierr) {
+        MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierr) {
     MPI_File c_fh;
     MPI_Datatype c_datatype;
     int ret_val;
-    
+
     c_fh = MPI_File_f2c(*fh);
     c_datatype = MPI_Type_f2c(*datatype);
-    
+
     ret_val = MPI_File_write_ordered(c_fh, buf, *count, c_datatype, status);
-    
+
     *ierr = (MPI_Fint)ret_val;
 }

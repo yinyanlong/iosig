@@ -14,10 +14,10 @@
 #include "pushio_trace.h"
 
 int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
-			  MPI_Datatype datatype, MPI_Status * status)
+        MPI_Datatype datatype, MPI_Status * status)
 {
 
-/* add by huaiming*/
+    /* add by huaiming*/
     int dtsize;
     struct timeval start, end;
     gettimeofday(&start, NULL);
@@ -29,7 +29,7 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
     iorec->data_size = count * dtsize;
     iorec->op_time = start;
     iorec->operation = MPI_WRITESH;
-/* end of add, by huaiming*/
+    /* end of add, by huaiming*/
 
     int error_code, bufsize, buftype_is_contig, filetype_is_contig;
     static char myname[] = "MPI_FILE_READ_SHARED";
@@ -56,15 +56,15 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
 
     if (count * datatype_size == 0) {
 #ifdef HAVE_STATUS_SET_BYTES
-	MPIR_Status_set_bytes(status, datatype, 0);
+        MPIR_Status_set_bytes(status, datatype, 0);
 #endif
-	error_code = MPI_SUCCESS;
-	goto fn_exit;
+        error_code = MPI_SUCCESS;
+        goto fn_exit;
     }
 
     /* --BEGIN ERROR HANDLING-- */
     MPIO_CHECK_INTEGRAL_ETYPE(fh, count, datatype_size, myname,
-			      error_code);
+            error_code);
     MPIO_CHECK_FS_SUPPORTS_SHARED(fh, myname, error_code);
     /* --END ERROR HANDLING-- */
 
@@ -78,43 +78,43 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
     ADIO_Get_shared_fp(fh, incr, &shared_fp, &error_code);
     /* --BEGIN ERROR HANDLING-- */
     if (error_code != MPI_SUCCESS) {
-	error_code = MPIO_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL,
-					  myname, __LINE__, MPI_ERR_INTERN,
-					  "**iosharedfailed", 0);
-	error_code = MPIO_Err_return_file(fh, error_code);
-	goto fn_exit;
+        error_code = MPIO_Err_create_code(MPI_SUCCESS, MPIR_ERR_FATAL,
+                myname, __LINE__, MPI_ERR_INTERN,
+                "**iosharedfailed", 0);
+        error_code = MPIO_Err_return_file(fh, error_code);
+        goto fn_exit;
     }
     /* --END ERROR HANDLING-- */
 
     if (buftype_is_contig && filetype_is_contig) {
-	/* convert bufocunt and shared_fp to bytes */
-	bufsize = datatype_size * count;
-	off = fh->disp + fh->etype_size * shared_fp;
+        /* convert bufocunt and shared_fp to bytes */
+        bufsize = datatype_size * count;
+        off = fh->disp + fh->etype_size * shared_fp;
 
-	/* if atomic mode requested, lock (exclusive) the region, because there                                                                                                                                            
-	   could be a concurrent noncontiguous request. On NFS, locking is                                                                                                                                                 
-	   done in the ADIO_WriteContig. */
+        /* if atomic mode requested, lock (exclusive) the region, because there                                                                                                                                            
+           could be a concurrent noncontiguous request. On NFS, locking is                                                                                                                                                 
+           done in the ADIO_WriteContig. */
 
-	if ((fh->atomicity) && (fh->file_system != ADIO_NFS))
-	    ADIOI_WRITE_LOCK(fh, off, SEEK_SET, bufsize);
+        if ((fh->atomicity) && (fh->file_system != ADIO_NFS))
+            ADIOI_WRITE_LOCK(fh, off, SEEK_SET, bufsize);
 
-	ADIO_WriteContig(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
-			 off, status, &error_code);
+        ADIO_WriteContig(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
+                off, status, &error_code);
 
-	if ((fh->atomicity) && (fh->file_system != ADIO_NFS))
-	    ADIOI_UNLOCK(fh, off, SEEK_SET, bufsize);
+        if ((fh->atomicity) && (fh->file_system != ADIO_NFS))
+            ADIOI_UNLOCK(fh, off, SEEK_SET, bufsize);
     } else {
-	ADIO_WriteStrided(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
-			  shared_fp, status, &error_code);
-	/* For strided and atomic mode, locking is done in ADIO_WriteStrided */
+        ADIO_WriteStrided(fh, buf, count, datatype, ADIO_EXPLICIT_OFFSET,
+                shared_fp, status, &error_code);
+        /* For strided and atomic mode, locking is done in ADIO_WriteStrided */
     }
 
     /* --BEGIN ERROR HANDLING-- */
     if (error_code != MPI_SUCCESS)
-	error_code = MPIO_Err_return_file(fh, error_code);
+        error_code = MPIO_Err_return_file(fh, error_code);
     /* --END ERROR HANDLING-- */
 
-  fn_exit:
+fn_exit:
     MPIR_Nest_decr();
     MPIU_THREAD_CS_EXIT(ALLFUNC,);
 
@@ -128,15 +128,15 @@ int MPI_File_write_shared(MPI_File mpi_fh, void *buf, int count,
 }
 
 void mpi_file_write_shared_(MPI_Fint *fh, void *buf, MPI_Fint *count,
-		    MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierr) {
+        MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierr) {
     MPI_File c_fh;
     MPI_Datatype c_datatype;
     int ret_val;
-    
+
     c_fh = MPI_File_f2c(*fh);
     c_datatype = MPI_Type_f2c(*datatype);
-    
+
     ret_val = MPI_File_write_shared(c_fh, buf, *count, c_datatype, status);
-    
+
     *ierr = (MPI_Fint)ret_val;
 }
