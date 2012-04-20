@@ -50,3 +50,13 @@ int MPI_File_seek(MPI_File mpi_fh, MPI_Offset offset, int whence)
     return ret_val;
 }
 
+void mpi_file_seek_(MPI_Fint *fh, MPI_Offset *offset, MPI_Fint *whence, MPI_Fint *ierr) {
+    MPI_File c_fh;
+    int ret_val;
+    
+    c_fh = MPI_File_f2c(*fh);
+    
+    ret_val = MPI_File_seek(c_fh, *offset, *whence);
+    
+    *ierr = (MPI_Fint)ret_val;
+}

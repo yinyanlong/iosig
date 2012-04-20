@@ -25,6 +25,20 @@ int MPI_Init(int *argc, char ***argv)
     return ret_val;
 }
 
+void mpi_init_ (int *ierr)
+{
+    int ret_val;
+    int argc;
+    char *argv[32];
+
+    //get command line arguments from main()
+    getProcCmdLine(&argc, argv);
+    ret_val = MPI_Init(&argc, (char ***)&argv);
+    
+    *ierr = ret_val;
+}
+
+
 int MPI_Finalize(void)
 {
     int ret_val;
@@ -34,5 +48,13 @@ int MPI_Finalize(void)
 
     ret_val = PMPI_Finalize();
     return ret_val;
+}
+
+void mpi_finalize_ (int *ierr)
+{
+
+    int ret_val;
+    ret_val = MPI_Finalize();
+    *ierr = ret_val;
 }
 

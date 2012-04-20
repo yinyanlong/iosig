@@ -53,3 +53,17 @@ int MPI_File_iread_at(MPI_File mpi_fh, MPI_Offset offset, void *buf,
     return ret_val;
 }
 
+void mpi_file_iread_at_(MPI_Fint *fh, MPI_Offset *offset, void *buf, int *count, MPI_Fint *datatype, MPI_Fint *request, MPI_Fint *ierr){
+    int ret_val;
+    MPI_File c_fh;
+    MPI_Datatype c_datatype;
+    MPI_Request c_request;
+    
+    c_fh = MPI_File_f2c(*fh);
+    c_datatype = MPI_Type_f2c(*datatype);
+    
+    ret_val = MPI_File_iread_at(c_fh, *offset, buf, *count, c_datatype, &c_request);
+    *ierr = (MPI_Fint)ret_val;
+    if(ret_val == MPI_SUCCESS)
+        *request = MPI_Request_c2f(c_request);
+}

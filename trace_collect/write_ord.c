@@ -107,3 +107,16 @@ int MPI_File_write_ordered(MPI_File mpi_fh, void *buf, int count,
     return error_code;
 }
 
+void mpi_file_write_ordered_(MPI_Fint *fh, void *buf, MPI_Fint *count,
+		     MPI_Fint *datatype, MPI_Status *status, MPI_Fint *ierr) {
+    MPI_File c_fh;
+    MPI_Datatype c_datatype;
+    int ret_val;
+    
+    c_fh = MPI_File_f2c(*fh);
+    c_datatype = MPI_Type_f2c(*datatype);
+    
+    ret_val = MPI_File_write_ordered(c_fh, buf, *count, c_datatype, status);
+    
+    *ierr = (MPI_Fint)ret_val;
+}

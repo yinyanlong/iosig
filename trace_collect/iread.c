@@ -50,3 +50,18 @@ int MPI_File_iread(MPI_File mpi_fh, void *buf, int count,
     return ret_val;
 }
 
+void mpi_file_iread_(MPI_Fint *fh, void *buf, int *count, MPI_Fint *datatype, MPI_Fint *request, MPI_Fint *ierr){
+    MPI_File c_fh;
+    int ret_val;
+    MPI_Datatype c_datatype;
+    MPI_Request c_request;
+    
+    c_fh = MPI_File_f2c(*fh);
+    c_datatype = MPI_Type_f2c(*datatype);
+    
+    ret_val = MPI_File_iread(c_fh, buf, *count, c_datatype, &c_request);
+    
+    if(ret_val == MPI_SUCCESS)
+        *request = MPI_Request_c2f(c_request);
+    *ierr = (MPI_Fint)ret_val;
+}
