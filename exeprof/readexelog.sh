@@ -18,10 +18,12 @@ while read LINETYPE FADDR CADDR CTIME; do
     then
         CNAME="$(addr2line -f -e ${EXECUTABLE} ${CADDR}|head -1)"
         CLINE="$(addr2line -s -e ${EXECUTABLE} ${CADDR})"
-        echo "Enter ${FNAME} at ${CDATE}, called from ${CNAME} (${CLINE})"
+        #echo "Enter ${FNAME} at ${CDATE}, called from ${CNAME} (${CLINE})"
+        echo "Enter ${FNAME} at ${CTIME}, called from ${CNAME} (${CLINE})"
     fi
     if test "${LINETYPE}" = "x"
     then
-        echo "Exit  ${FNAME} at ${CDATE}"
+        #echo "Exit  ${FNAME} at ${CDATE}"
+        echo "Exit  ${FNAME} at ${CTIME}"
     fi
 done < "${TRACELOG}"
