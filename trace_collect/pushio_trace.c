@@ -81,6 +81,8 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
     if (!out_fp) {
         fprintf(stderr,
                 "Pointer to log file doesn't exist in log_read_trace. Opening now. \n");
+
+        /* TODO: consider removing the following five lines */
         char filename_pid[25];
         int pid = getpid();
         sprintf(filename_pid, "trace_%d.out", pid);

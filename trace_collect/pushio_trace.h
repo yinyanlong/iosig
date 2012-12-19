@@ -34,7 +34,12 @@
 #define MAX_NUM_RTB_ENTRIES 1024
 
 struct timeval init_tv;
-FILE *out_fp;
+struct timeval bigbang; /* bigbang means the beginning of 
+                           everything, here it means the
+                           beginning of this process */
+FILE *out_fp; /* file pointer of the IO trace file */
+FILE *exe_fp; /* file pointer of the execution trace file */
+
 FILE *fp_rank;
 
 typedef struct PushIO_Trace_record_t {
