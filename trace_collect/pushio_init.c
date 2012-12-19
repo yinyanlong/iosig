@@ -15,7 +15,10 @@
 int MPI_Init(int *argc, char ***argv)
 {
     int ret_val;
-    gettimeofday(&init_tv, NULL);
+    //gettimeofday(&init_tv, NULL);
+    init_tv.tv_sec = bigbang.tv_sec;
+    init_tv.tv_usec = bigbang.tv_usec;
+
     init_log();
     ret_val = PMPI_Init(argc, argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &thisrank);
