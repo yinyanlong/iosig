@@ -8,5 +8,5 @@ main.o: main.c
 	gcc -finstrument-functions -g -c -o main.o main.c
 
 clean:
-	rm *.o *.out
+	rm *.o main
 
