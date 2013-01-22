@@ -22,7 +22,7 @@ C*    *******************************************************************
       integer buf(NBYTES/4)
       integer fh, status(MPI_STATUS_SIZE)
       integer ierr, argc, iargc
-      integer*8 offset
+C*      integer*8 offset
 
       call MPI_INIT(ierr)
       call MPI_COMM_SIZE(MPI_COMM_WORLD, nprocs, ierr)
@@ -52,7 +52,7 @@ C*    *******************************************************************
      1                  ierr)
       end if
 
-      offset = myrank*NBYTES
+C*      offset = myrank*NBYTES
       print*, "File name: ", str
 
       do i=1, NTIMES
@@ -63,7 +63,7 @@ C*        ***************************************************************
          call MPI_FILE_OPEN(MPI_COMM_WORLD, str, 
      1                     MPI_MODE_CREATE+MPI_MODE_RDWR, MPI_INFO_NULL, 
      2                     fh, ierr)
-         call MPI_FILE_SEEK(fh, offset, MPI_SEEK_SET, ierr)
+C*         call MPI_FILE_SEEK(fh, offset, MPI_SEEK_SET, ierr)
          call MPI_FILE_WRITE(fh, buf, NBYTES, MPI_BYTE, status, ierr)
          call MPI_FiLE_CLOSE(fh, ierr)
 
@@ -79,7 +79,7 @@ C*       ****************************************************************
          call MPI_FILE_OPEN(MPI_COMM_WORLD, str, 
      1                     MPI_MODE_CREATE+MPI_MODE_RDWR, MPI_INFO_NULL, 
      2                     fh, ierr)
-         call MPI_FILE_SEEK(fh, offset, MPI_SEEK_SET, ierr)
+C*         call MPI_FILE_SEEK(fh, offset, MPI_SEEK_SET, ierr)
          call MPI_FILE_READ(fh, buf, NBYTES, MPI_BYTE, status, ierr)
          call MPI_FILE_CLOSE(fh, ierr)
 
