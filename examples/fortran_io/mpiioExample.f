@@ -33,7 +33,6 @@ C*    * argument and broadcasts it to other processes			*
 C*    *******************************************************************
       if (myrank .eq. 0) then
          argc = iargc()
-         print*, 'argc======', argc
          i = 0
          call getarg(i,str)
 
@@ -61,15 +60,11 @@ C*    *******************************************************************
 C*        ***************************************************************
 C*        * open the file, seek, write, and then close			*
 C*        ***************************************************************
-         print*, 'hehe 10'
          call MPI_FILE_OPEN(MPI_COMM_WORLD, str, 
      1                     MPI_MODE_CREATE+MPI_MODE_RDWR, MPI_INFO_NULL, 
      2                     fh, ierr)
-         print*, 'hehe 20'
          call MPI_FILE_SEEK(fh, offset, MPI_SEEK_SET, ierr)
-         print*, 'hehe 30'
          call MPI_FILE_WRITE(fh, buf, NBYTES, MPI_BYTE, status, ierr)
-         print*, 'hehe 40'
          call MPI_FiLE_CLOSE(fh, ierr)
 
 C*       ****************************************************************

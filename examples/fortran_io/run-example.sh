@@ -1,1 +1,1 @@
-mpiexec -np 1 ./mpiioExample -fname /tmp/datafile
+mpiexec -np 2 ./mpiioExample -fname /tmp/datafile
