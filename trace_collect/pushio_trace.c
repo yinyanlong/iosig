@@ -495,10 +495,60 @@ void getProcCmdLine (int *ac, char **av)
                     i++;
                 }
             }
+            free (inbuf);
         }
         *ac = i;
 
-        free (inbuf);
+        fclose (infile);
+    }
+}
+
+#define IOSIG_MAX_ARG_STRING_SIZE 4096
+void getProcCmdLine2 (int *ac, char **av)
+{
+    int i = 0, pid;
+    int length = 0;
+    char *inbuf;
+    char file[256];
+    FILE *infile;
+    char *arg_ptr;
+
+    *ac = 0;
+    *av = NULL;
+
+    pid = getpid ();
+    snprintf (file, 256, "/proc/%d/cmdline", pid);
+    infile = fopen (file, "r");
+
+    if (infile != NULL)
+    {
+        //while (!feof (infile))
+        if (!feof (infile))
+        {
+            //inbuf = malloc (IOSIG_MAX_ARG_STRING_SIZE);
+            av[0] = malloc (IOSIG_MAX_ARG_STRING_SIZE);
+            memset(av[0], 0, IOSIG_MAX_ARG_STRING_SIZE);
+            //av[0] = inbuf;
+            length = fread (av[0], 1, IOSIG_MAX_ARG_STRING_SIZE, infile);
+
+            if ( length > 0)
+            {
+                // no need to loop to replace whitespace to '\0'
+                // just assign pointers to head of each arg
+                arg_ptr = av[0];
+                while (*arg_ptr != '\0')
+                {
+                    if (i!=0)
+                        av[i] = arg_ptr;
+                    if ( (arg_ptr+strlen(av[i])+1) < av[0]+IOSIG_MAX_ARG_STRING_SIZE )
+                        arg_ptr += strlen (av[i]) + 1;
+                    i++;
+                }
+            }
+            //free (inbuf);
+        }
+        *ac = i;
+
         fclose (infile);
     }
 }
