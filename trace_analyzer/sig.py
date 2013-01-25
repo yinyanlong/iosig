@@ -93,9 +93,9 @@ def main(argv):
 
     sig._format_prop = Properties()
     sig._format_prop.load(open(sig._format_file))
-    print sig._format_prop
-    print sig._format_prop.items()
-    print sig._format_prop['skip_lines']
+    debugPrint( sig._format_prop )
+    debugPrint( sig._format_prop.items())
+    debugPrint( sig._format_prop['skip_lines'])
 
     if filename and os.path.isfile(filename):
         print "Using trace file: " + filename
@@ -123,7 +123,7 @@ def detectSignature(filename):
     # the list contains all the accesses
     rlist = AccList()
     wlist = AccList()
-    #accList = AccList()  # all lines with "accList" are commentted out
+    accList = AccList()  # all lines with "accList" are commentted out
                           # because the figure drawing using accList
                           # is replaced with rlist and wlist
 
@@ -162,7 +162,7 @@ def detectSignature(filename):
         ## save to list
         op = words[op_index].upper();
         acc = Access(words)
-        #accList.append(acc)
+        accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
             debugPrint("one READ")
@@ -176,7 +176,7 @@ def detectSignature(filename):
     f.close()
     rlist.trace = filename
     wlist.trace = filename
-    #accList.trace = filename
+    accList.trace = filename
 
     print 'Numbers of operations - ', 'Read: ', len(rlist), ' write: ', len(wlist)
 
@@ -201,7 +201,7 @@ def detectSignature(filename):
         wlist.makeup_output(sig._out_path)
 
     #if len(accList) > 0:
-    #    accList.gen_iorates(sig._out_path)
+        accList.gen_iorates(sig._out_path)
 
 def generateRWBWFigs(filename):
     # the list contains all the accesses
@@ -290,12 +290,14 @@ def generateRWBWFigs(filename):
         readF.write( "{0} {1}\n".format(0, 0) )
         readF.close()
     else:
+        print "gnuplot"
         # gnuplot
     if (wlistEmpty == 1):
         writeF = open("result_output/write.dat", 'a+')
         writeF.write( "{0} {1}\n".format(0, 0) )
         writeF.close()
     else:
+        print "gnuplot"
         # gnuplot
     
 if __name__ == '__main__':
