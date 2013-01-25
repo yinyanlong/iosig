@@ -78,6 +78,8 @@ class AccList(list):
             msize = 2
             while msize < MMAXSIZE:
                 index = self.detect_signature_markov(start, end, msize)
+                #if index == 1299:
+                #    exit()
 
                 if index > start:
                     start = index
@@ -660,13 +662,15 @@ class AccList(list):
             acc = self[i]
             if acc.endTime > endTime:
                 endTime = acc.endTime
-            rate = acc.size/(acc.endTime-acc.startTime)
+            rate = 1.0*acc.size/1000.0/1000.0/(acc.endTime-acc.startTime)
             if rate > peakRate:
                 peakRate = rate
             oper = acc.startTime, acc.endTime, rate
-            if acc.op.count('READ')>0 or acc.op == 'R':
+            if acc.op.count('READ')>0 or acc.op == 'R' or acc.op.count('read')>0:
+                debugPrint( 'Tuple: ', oper)
                 read_tuples.append(oper)
-            if acc.op.count('WRITE')>0 or acc.op == 'W':
+            if acc.op.count('WRITE')>0 or acc.op == 'W' or acc.op.count('write')>0:
+                debugPrint( 'Tuple: ', oper)
                 write_tuples.append(oper)
 
         read_ops = get_rate_serie(read_tuples, 0, endTime)
@@ -679,12 +683,15 @@ class AccList(list):
             write_time.append(op[0])
             write_rate.append(op[2])
 
+        debugPrint('Start plotting ... ')
         # draw using 'step' function
         plt.step(read_time, read_rate, where='post', color='blue', label='read rates') 
         plt.step(write_time, write_rate, where='post', color='red', label='write rates') 
 
         print 'entTime: ', endTime
         print 'peakRate: ', peakRate
+        debugPrint( 'Number of writes: ', len(write_ops) )
+        debugPrint( 'Number of reads: ', len(read_ops) )
         plt.xlim(0, endTime*1.1) 
         plt.ylim(0-peakRate*0.05, peakRate*1.2)
         plt.legend(loc=2)
@@ -694,6 +701,38 @@ class AccList(list):
         plt.grid(True)
 
         plt.savefig(path+"/iorates.png")
+
+    def toIORStep(self, outputDataFile, theInteger):
+        """Generate the iorates figure"""
+        """ theInteger: 1 for read list, 2 for write list"""
+
+        debugPrint("Generating the time steps data, the ingeter: ", theInteger)
+
+        endTime = 0
+        peakRate = 0
+        
+        tuples = []
+        for i in range(len(self)):
+            acc = self[i]
+            if acc.endTime > endTime:
+                endTime = acc.endTime
+            rate = acc.size/(acc.endTime-acc.startTime)/1000.0/1000.0
+            if rate > peakRate:
+                peakRate = rate
+            oper = acc.startTime, acc.endTime, rate
+            tuples.append(oper)
+
+        ops = get_rate_serie(tuples, 0, endTime)
+
+        f = open(outputDataFile, 'a+')
+        for op in ops:
+            f.write( "{0} {1}\n".format(op[0], op[2]) )
+            if op[2] > 0 and theInteger == 1:
+                sig._total_read_time += op[1]-op[0] 
+            if op[2] > 0 and theInteger == 2:
+                sig._total_write_time += op[1]-op[0] 
+
+        f.close()
 
 def get_rate_serie(op_tuples, start, end):
     """ Get rate series from list of operation tuples """
@@ -717,12 +756,20 @@ def get_rate_serie(op_tuples, start, end):
             if (i+1) < original_length:
                 next_op = original_tuples[i+1] 
                 if op[1] > next_op[0]:
+                    debugPrint('It happens!!!!!!!!! ')
+                    debugPrint('     op: ', op[0], ' ', op[1], ' ', op[2])
+                    debugPrint('next op: ', next_op[0], ' ', next_op[1], ' ', next_op[2])
+                    # two cases
+                    #if op[2] <= next_op[2]:
                     step = cursor, next_op[0], op[2]
                     new_tuples.append(step)
                     cursor = next_op[0]
 
                     step = cursor, op[1], (op[2]+next_op[2])
                     new_tuples.append(step)
+                    #else:
+
+
                 else:
                     step = cursor, op[1], op[2]
                     new_tuples.append(step)
@@ -731,8 +778,10 @@ def get_rate_serie(op_tuples, start, end):
                 step = cursor, op[1], op[2]
                 new_tuples.append(step)
                 cursor = op[1]
+        # end of for
 
         new_length = len(new_tuples)
+        debugPrint('Original length: ', original_length, ', New Length: ', new_length)
         if new_length == original_length:
             if cursor < end:
                 step = cursor, end, 0
@@ -740,7 +789,7 @@ def get_rate_serie(op_tuples, start, end):
             step = new_tuples[-1][1], new_tuples[-1][1], 0
             new_tuples.append(step)
             
-            return new_tuples
+            return new_tuples    # return new_tuples[1:] ; why discard the first element
 
         original_tuples = new_tuples
         original_length = len(original_tuples)
