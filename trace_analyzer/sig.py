@@ -123,7 +123,9 @@ def detectSignature(filename):
     # the list contains all the accesses
     rlist = AccList()
     wlist = AccList()
-    accList = AccList()
+    #accList = AccList()  # all lines with "accList" are commentted out
+                          # because the figure drawing using accList
+                          # is replaced with rlist and wlist
 
     # open the trace file
     f = open(filename, 'r')
@@ -160,7 +162,7 @@ def detectSignature(filename):
         ## save to list
         op = words[op_index].upper();
         acc = Access(words)
-        accList.append(acc)
+        #accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
             debugPrint("one READ")
@@ -174,7 +176,7 @@ def detectSignature(filename):
     f.close()
     rlist.trace = filename
     wlist.trace = filename
-    accList.trace = filename
+    #accList.trace = filename
 
     print 'Numbers of operations - ', 'Read: ', len(rlist), ' write: ', len(wlist)
 
@@ -198,8 +200,8 @@ def detectSignature(filename):
         wlist.gen_protobuf(sig._out_path)
         wlist.makeup_output(sig._out_path)
 
-    if len(accList) > 0:
-        accList.gen_iorates(sig._out_path)
+    #if len(accList) > 0:
+    #    accList.gen_iorates(sig._out_path)
 
 def generateRWBWFigs(filename):
     # the list contains all the accesses
