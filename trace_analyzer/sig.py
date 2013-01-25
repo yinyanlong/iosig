@@ -24,7 +24,7 @@ __date__ = "$Date: 10/03/2011 18:03:33 $"
 __copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
 __license__ = "Python"
 
-import sys, os, string, getopt
+import sys, os, string, getopt, gc
 from access import *
 from accList import *
 from prop import *
@@ -39,8 +39,13 @@ global _format_prop
 global _protobuf
 global _out_path
 
+global _total_read_time
+global _total_write_time
+sig._total_read_time = 0.0
+sig._total_write_time = 0.0
+
 # the following parameters can be specified by user's command line arguments
-sig._range = 50000
+sig._range = 5000 #5000 each time, so mem consumption is about 5000 lines
 sig._blksz = 0
 sig._debug = 0
 sig._format_file = "standard.properties"
@@ -101,7 +106,20 @@ def main(argv):
     if not os.path.isdir(sig._out_path):
         print "Output put directory does not exist, create it."
         os.makedirs(sig._out_path)
+    # Finished handling arguments
 
+    # detect patterns
+    # and generates IO rates figure
+    detectSignature(filename)
+
+    # generate iorates figure
+    # generateIORates(filename)
+
+    # translate the list to "step data" into "*.dat" files
+    # generate R/W bandwidth over time figures
+    generateRWBWFigs(filename)
+
+def detectSignature(filename):
     # the list contains all the accesses
     rlist = AccList()
     wlist = AccList()
@@ -121,6 +139,7 @@ def main(argv):
     op_index = int(sig._format_prop['op'])
     debugPrint ('op_index: ', op_index)
     op = ''
+
     for i in range(sig._range):
         line = f.readline()
         if not line:
@@ -159,10 +178,6 @@ def main(argv):
 
     print 'Numbers of operations - ', 'Read: ', len(rlist), ' write: ', len(wlist)
 
-    #print the list
-    #for i in accList:
-    #   print i
-
     ## deal with the list
     rlist.detect_signature(0, min(sig._range-j-1, len(rlist)-1) )
     wlist.detect_signature(0, min(sig._range-j-1, len(wlist)-1) )
@@ -186,6 +201,99 @@ def main(argv):
     if len(accList) > 0:
         accList.gen_iorates(sig._out_path)
 
+def generateRWBWFigs(filename):
+    # the list contains all the accesses
+    rlist = AccList()
+    wlist = AccList()
+    rlistEmpty = 1
+    wlistEmpty = 1
+
+    # open the trace file
+    f = open(filename, 'r')
+    #read_rate_output_file = open("result_output/read.dat", 'a')
+    #write_rate_output_file = open("result_output/write.dat", 'a')
+
+    # skip the first several lines
+    # Maybe the skipped lines are table heads
+    for i in range(int(sig._format_prop['skip_lines'])):
+        line = f.readline()
+             
+    # scan the file and put the access item into list
+    i = 0
+    j = 0
+    eof = 0 # reaching the EOF?
+    op_index = int(sig._format_prop['op'])
+    debugPrint ('op_index: ', op_index)
+    op = ''
+    while 1:
+        
+        # handle 5000 operations once
+        for i in range(sig._range):
+            line = f.readline()
+            if not line:
+                eof = 1
+                break
+            words = string.split(line)
+            # there might be some blank lines
+            if len(words) < 6:
+                j+=1
+                continue
+
+            ## only "READ" and "WRITE" will be saved
+            #if words[-1].count('READ') == 0 and words[-1].count('WRITE') == 0:
+            # to test chomob, only use write
+            # if words[-1].count('WRITE') == 0:
+            #    j+=1
+            #    continue
+
+            ## save to list
+            op = words[op_index].upper();
+            acc = Access(words)
+
+            if op.count('READ')>0 or op == 'R':
+                debugPrint("one READ")
+                rlist.append(acc)
+
+            if op.count('WRITE')>0 or op == 'W':
+                debugPrint("one WRITE")
+                wlist.append(acc)
+        # finish reading a batch of 5000 lines of the trace file
+
+        # translate the list to "step data" into "*.dat" files
+        # here the write operation should be "append"
+        # because it's handling 5000 lines each time
+        if (len(rlist) > 0):
+            rlist.toIORStep("result_output/read.dat", 1) # 1 for read
+            rlistEmpty = 0
+        if (len(wlist) > 0):
+            wlist.toIORStep("result_output/write.dat", 2) # 2 for write
+            wlistEmpty = 0
+
+        # empty the two lists
+        rlist = AccList()
+        wlist = AccList()
+        gc.collect()   # garbage collection
+
+        # reached EOF? exit the "while 1" loop
+        if eof == 1:
+            break
+
+
+    ## close the opened file
+    f.close()
+    if (rlistEmpty == 1):
+        readF = open("result_output/read.dat", 'a+')
+        readF.write( "{0} {1}\n".format(0, 0) )
+        readF.close()
+    else:
+        # gnuplot
+    if (wlistEmpty == 1):
+        writeF = open("result_output/write.dat", 'a+')
+        writeF.write( "{0} {1}\n".format(0, 0) )
+        writeF.close()
+    else:
+        # gnuplot
+    
 if __name__ == '__main__':
     main(sys.argv[1:])
     print '~ END ~'
