@@ -1,0 +1,53 @@
+MPIPATH		= /export/home/yyin/common/program_files/mpich2-1.4.1p1
+INSTALL_DIR	= /export/home/yyin/install
+
+CXX		= gcc
+F77             = gfortran
+
+TRC_SRCS	= $(wildcard *.c)
+TRC_OBJS	= $(TRC_SRCS:.c=.o)
+
+F77_SRCS    = $(wildcard *.f)
+F77_OBJS    = $(F77_SRCS:.f=.o)
+
+DFLAGS		:= $(DFLAGS) -DFORTRANDOUBLEUNDERSCORE
+DFLAGS		:= $(DFLAGS) -D_LARGEFILE64_SOURCE
+DFLAGS		:= $(DFLAGS) -D_FILE_OFFSET_BITS=64
+DFLAGS		:= $(DFLAGS) -DHAVE_ROMIOCONF_H
+
+#CXXFLAGS	:= -O
+CXXFLAGS	:= $(CXXFLAGS) -I${INSTALL_DIR}/include
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/ch3/include                 # mpidpost.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/common/datatype             # mpid_datatype.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/ch3/channels/sock/include   # mpidi_ch3_post.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/common/sock                 # for older version of mpich2
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpid/common/sock/poll            # for older version of mpich2
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpi/romio/adio/include           # adio.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/include                          # mpiimpl.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpl/include                      # mpl.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/util/wrappers                    # mpiu_process_wrappers.h
+CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/mpi/romio/mpi-io                 # mpioimpl.h
+#CXXFLAGS	:= $(CXXFLAGS) -O -I. -I${MPIPATH}/src/mpi/romio/mpi-io
+#CXXFLAGS	:= $(CXXFLAGS) -I${MPIPATH}/src/binding/f77
+
+F77FLAGS	:=
+
+.c.o:
+	$(CXX) -c $(CXXFLAGS) $(DFLAGS) $<
+	
+.f.o:
+	$(F77) -c $(F77FLAGS) $(DFLAGS) $<
+
+all:	trace
+
+trace: $(TRC_OBJS) $(F77_OBJS)
+	ar rlc libiosig.a $(TRC_OBJS) $(F77_OBJS)
+	@echo "... compile comleted."
+
+install: trace
+	cp libiosig.a ${INSTALL_DIR}/lib
+
+clean::
+	rm -f *.o
+	rm -rf libiosig.a
+
