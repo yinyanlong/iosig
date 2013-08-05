@@ -25,8 +25,8 @@ int MPI_File_iwrite_at(MPI_File mpi_fh, MPI_Offset offset, void *buf,
     iorec->mpi_rank = thisrank;
     iorec->filedes = mpi_fh->fd_sys;
     //iorec->file_pos = mpi_fh->fp_ind;
-    iorec->file_pos = offset;
     MPI_Type_size(datatype, &dtsize);
+    iorec->file_pos = offset * dtsize;
     iorec->data_size = count * dtsize;
     iorec->op_time = start;
     iorec->operation = MPI_IWRITEAT;
