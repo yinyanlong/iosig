@@ -12,23 +12,14 @@
 #include "mpiimpl.h"
 #include "iosig_trace.h"
 
+struct timeval bigbang;
+
 int MPI_Init(int *argc, char ***argv)
 {
     int ret_val;
-    //gettimeofday(&init_tv, NULL);
-    init_tv.tv_sec = bigbang.tv_sec;
-    init_tv.tv_usec = bigbang.tv_usec;
-
-    /*
-    printf("======\n");
-    printf("# of arg: %d\n", *argc);
-    int i=0;
-    for(i=0; i<*argc; i++) {
-        printf(" argv[%d]: %s  %u   %u\n", i, (*argv)[i], &(*argv)[i],   (*argv)[i]        );
+    if (!bigbang.tv_sec) {
+        gettimeofday(&bigbang, NULL);
     }
-    printf(" argv[%d]: %s  %u   %u\n", i, (*argv)[i], &(*argv)[i],   (*argv)[i]        );
-    printf("======\n");
-    */
 
     init_log();
     ret_val = PMPI_Init(argc, argv);

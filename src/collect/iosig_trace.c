@@ -88,11 +88,9 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
         sprintf(filename_pid, "trace_%d.out", pid);
 
         out_fp = fopen(filename_pid, "a");
-
-        gettimeofday(&init_tv, NULL);
     }
-    timeval_diff(&diffstart, &(pushio_rec->op_time), &init_tv);
-    timeval_diff(&diffend, &(pushio_rec->op_end_time), &init_tv);
+    timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
+    timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     /* find MPI_rank information  */
     if (!pushio_rec->is_mpi_operation) {
@@ -165,7 +163,7 @@ void PushIO_RTB_log(int rank, PushIO_Trace_record * pushio_rec)
             break;
     }
 
-    timeval_diff(&difftv, &(pushio_rec->op_time), &init_tv);
+    timeval_diff(&difftv, &(pushio_rec->op_time), &bigbang);
 
     rtb_node->rtb_entry.filedes = pushio_rec->filedes;
     rtb_node->rtb_entry.file_pos = pushio_rec->file_pos;

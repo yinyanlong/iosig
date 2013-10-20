@@ -19,11 +19,10 @@
  *              09/14/2011 by Yanlong Yin
  */
 
+#include <string.h>
 #include "mpioimpl.h"
 #include "mpiimpl.h"
 #include "iosig_trace.h"
-
-#include <string.h>
 
 int MPI_File_open(MPI_Comm comm, char *filename, int amode,
         MPI_Info info, MPI_File * fh)

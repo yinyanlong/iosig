@@ -33,10 +33,11 @@
 #define MAX_NUM_PROCS 4
 #define MAX_NUM_RTB_ENTRIES 1024
 
-struct timeval init_tv;
-struct timeval bigbang; /* bigbang means the beginning of 
-                           everything, here it means the
-                           beginning of this process */
+extern struct timeval bigbang; // = (struct timeval){0};
+/* bigbang means the beginning of everything, here it means the
+ * beginning of this application 
+ */
+
 FILE *out_fp; /* file pointer of the IO trace file */
 FILE *exe_fp; /* file pointer of the execution trace file */
 

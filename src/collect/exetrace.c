@@ -3,8 +3,7 @@
 #include "iosig_trace.h"
 
 //static FILE *exe_fp;
-//static struct timeval bigbang;
-//static unsigned long bigbang;
+struct timeval bigbang = (struct timeval){0};
 
 /*
  * Initial the log file for exe_prof.
