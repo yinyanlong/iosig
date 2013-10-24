@@ -32,14 +32,19 @@
 
 #define MAX_NUM_PROCS 4
 #define MAX_NUM_RTB_ENTRIES 1024
+#define FILE_PATH_LENGTH 128
+#define IOSIG_MAX_ARG_STRING_SIZE 4096
 
-extern struct timeval bigbang; // = (struct timeval){0};
-/* bigbang means the beginning of everything, here it means the
- * beginning of this application 
- */
+extern int my_rank;              /* my_rank is initialized in -1, a value larger
+                                    than -1 means MPI are being used because it
+                                    get updated in MPI_Init(). */
+extern struct timeval bigbang;   /* bigbang means the beginning of everything,
+                                    here it means the beginning of this 
+                                    application */
 
-FILE *out_fp; /* file pointer of the IO trace file */
+FILE *out_fp; /* file pointer of the MPIIO trace file */
 FILE *exe_fp; /* file pointer of the execution trace file */
+FILE *posix_fp; /* file pointer of the POSIX I/O trace file */
 
 FILE *fp_rank;
 
@@ -85,12 +90,17 @@ int PushIO_RTB_dump_trace(int rank);
 int PushIO_RTB_file_traces(int rank);
 int PushIO_RTB_finalize(int rank);
 
-void init_log();
+void init_log(int rank);
 void end_log();
 void log_read_trace(PushIO_Trace_record * pushio_rec);
 int timeval_diff(struct timeval *result, struct timeval *x,
 		 struct timeval *y);
 void get_operation(char *operation, int rec_operation);
+void get_trace_file_path_pid(char *path, int trace_type);
+void get_trace_file_path_rank(char *path, int trace_type);
+#define TRACE_TYPE_EXE      1
+#define TRACE_TYPE_MPIIO    2
+#define TRACE_TYPE_POSIX    3
 
 #define MPI_SEEK 	51
 #define MPI_OPEN 	52

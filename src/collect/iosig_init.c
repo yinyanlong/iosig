@@ -21,9 +21,10 @@ int MPI_Init(int *argc, char ***argv)
         gettimeofday(&bigbang, NULL);
     }
 
-    init_log();
     ret_val = PMPI_Init(argc, argv);
     MPI_Comm_rank(MPI_COMM_WORLD, &thisrank);
+    my_rank = thisrank;
+    init_log(my_rank);
 
     PushIO_RTB_init(thisrank);
     iorec = malloc(sizeof(PushIO_Trace_record));

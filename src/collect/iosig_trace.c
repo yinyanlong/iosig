@@ -42,13 +42,11 @@
  ********************/
 
 /* Initialize log file  */
-void init_log()
-{
-    char filename_pid[25];
-    int pid = getpid();
-    sprintf(filename_pid, "trace_%d.out", pid);
+void init_log(int rank) {
+    char filename_rank[25];
+    sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
 
-    out_fp = fopen(filename_pid, "a");
+    out_fp = fopen(filename_rank, "a");
     if (!out_fp) {
         fprintf(stderr,
                 "Pointer to log file doesn't exist in init_log \n");
@@ -78,19 +76,6 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
     struct timeval diffstart, diffend;
     char operation[15];
     int rank;
-    if (!out_fp) {
-        fprintf(stderr,
-                "Pointer to log file doesn't exist in log_read_trace. Opening now. \n");
-
-        /* TODO: consider removing the following five lines */
-        char filename_pid[25];
-        int pid = getpid();
-        sprintf(filename_pid, "trace_%d.out", pid);
-
-        out_fp = fopen(filename_pid, "a");
-    }
-    timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
-    timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     /* find MPI_rank information  */
     if (!pushio_rec->is_mpi_operation) {
@@ -98,6 +83,18 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
     } else {
         rank = pushio_rec->mpi_rank;
     }
+
+    if (!out_fp) {
+        fprintf(stderr,
+                "Pointer to log file doesn't exist in log_read_trace. Opening now. \n");
+
+        /* TODO: consider removing the following 3 lines */
+        char filename_rank[25];
+        sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
+        out_fp = fopen(filename_rank, "a");
+    }
+    timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
+    timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     get_operation(operation, pushio_rec->operation);
 
@@ -550,3 +547,41 @@ void getProcCmdLine2 (int *ac, char **av)
         fclose (infile);
     }
 }
+
+
+void get_trace_file_path_pid(char *path, int trace_type) {
+    int pid = getpid();
+
+    switch (trace_type) {
+        case TRACE_TYPE_EXE:
+            sprintf(path, "exe_trace_pid-%d.out", pid);
+            break;
+        case TRACE_TYPE_MPIIO:
+            sprintf(path, "mpiio_trace_pid-%d.out", pid);
+            break;
+        case TRACE_TYPE_POSIX:
+            sprintf(path, "posix_trace_pid-%d.out", pid);
+            break;
+    }
+}
+
+void get_trace_file_path_rank(char *path, int trace_type) {
+    int pid = getpid();
+    if (my_rank == -1) {
+        get_trace_file_path_pid(path, trace_type);
+        return;
+    }
+
+    switch (trace_type) {
+        case TRACE_TYPE_EXE:
+            sprintf(path, "exe_trace_rank-%d.out", my_rank);
+            break;
+        case TRACE_TYPE_MPIIO:
+            sprintf(path, "mpiio_trace_rank-%d.out", my_rank);
+            break;
+        case TRACE_TYPE_POSIX:
+            sprintf(path, "posix_trace_rank-%d.out", my_rank);
+            break;
+    }
+}
+
