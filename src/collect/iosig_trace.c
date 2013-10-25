@@ -150,9 +150,9 @@ void PushIO_RTB_log(int rank, PushIO_Trace_record * pushio_rec)
         case (MPI_WRITESH):
         case (MPI_IWRITESH):
         case (MPI_WRITEORD):
-        case (READ):
-        case (WRITE):
-        case (SEEK):
+        case (POSIX_READ):
+        case (POSIX_WRITE):
+        case (POSIX_SEEK):
             rtb_node->rtb_entry.operation = pushio_rec->operation;
             break;
         default:
@@ -427,12 +427,6 @@ void get_operation(char *operation, int rec_operation)
         case (MPI_CLOSE):
             sprintf(operation, "MPI_CLOSE");
             break;
-        case (READ):
-            sprintf(operation, "READ");
-            break;
-        case (WRITE):
-            sprintf(operation, "WRITE");
-            break;
         case (MPI_READSH):
             sprintf(operation, "MPI_READSH");
             break;
@@ -451,8 +445,20 @@ void get_operation(char *operation, int rec_operation)
         case (MPI_WRITEORD):
             sprintf(operation, "MPI_WRITEORD");
             break;
-        case (SEEK):
-            sprintf(operation, "SEEK");
+        case (POSIX_SEEK):
+            sprintf(operation, "POSIX_SEEK");
+            break;
+        case (POSIX_READ):
+            sprintf(operation, "POSIX_READ");
+            break;
+        case (POSIX_WRITE):
+            sprintf(operation, "POSIX_WRITE");
+            break;
+        case (POSIX_OPEN):
+            sprintf(operation, "POSIX_WRITE");
+            break;
+        case (POSIX_CLOSE):
+            sprintf(operation, "POSIX_WRITE");
             break;
         default:
             sprintf(operation, "NOT KNOWN");
@@ -460,7 +466,6 @@ void get_operation(char *operation, int rec_operation)
     }
 }
 
-#define IOSIG_MAX_ARG_STRING_SIZE 4096
 void getProcCmdLine (int *ac, char **av)
 {
     int i = 0, pid;
@@ -498,7 +503,6 @@ void getProcCmdLine (int *ac, char **av)
     }
 }
 
-#define IOSIG_MAX_ARG_STRING_SIZE 4096
 void getProcCmdLine2 (int *ac, char **av)
 {
     int i = 0, pid;

@@ -2,10 +2,10 @@
 #include <stdarg.h>
 #include "iosig_trace.h"
 
-typedef struct IOSIG_POSIX_file_t {
+typedef struct iosig_posix_file_t {
     int file_handler;
     long int file_pos;
-} IOSIG_POSIX_file;
+} iosig_posix_file;
 
 /******** declare the real calls ********/
 void IOSIG_trace_posix_open () {

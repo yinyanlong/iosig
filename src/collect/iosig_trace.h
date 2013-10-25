@@ -98,39 +98,43 @@ int timeval_diff(struct timeval *result, struct timeval *x,
 void get_operation(char *operation, int rec_operation);
 void get_trace_file_path_pid(char *path, int trace_type);
 void get_trace_file_path_rank(char *path, int trace_type);
-#define TRACE_TYPE_EXE      1
-#define TRACE_TYPE_MPIIO    2
-#define TRACE_TYPE_POSIX    3
 
-#define MPI_SEEK 	51
-#define MPI_OPEN 	52
-#define MPI_CLOSE 	53
+enum iosig_trace_type {
+    TRACE_TYPE_EXE = 1,
+    TRACE_TYPE_MPIIO,
+    TRACE_TYPE_POSIX
+};
 
-#define MPI_READ 	101
-#define MPI_IREAD 	102
-#define MPI_READAT 	103
-#define MPI_READALL 	104
-#define MPI_READATALL 	105
-#define MPI_IREADAT 	106
-#define MPI_READSH 	107
-#define MPI_IREADSH 	108
-#define MPI_READORD 	109
+enum iosig_io_operation {
+    MPI_OPEN = 1,
+    MPI_CLOSE,
+    MPI_SEEK,
+    MPI_READ,
+    MPI_IREAD,
+    MPI_READAT,
+    MPI_READALL,
+    MPI_READATALL,
+    MPI_IREADAT,
+    MPI_READSH,
+    MPI_IREADSH,
+    MPI_READORD,
 
-#define MPI_WRITE 	151
-#define MPI_IWRITE 	152
-#define MPI_WRITEAT 	153
-#define MPI_WRITEALL 	154
-#define MPI_WRITEATALL 	155
-#define MPI_IWRITEAT 	156
-#define MPI_WRITESH 	157
-#define MPI_IWRITESH 	158
-#define MPI_WRITEORD 	159
+    MPI_WRITE,
+    MPI_IWRITE,
+    MPI_WRITEAT,
+    MPI_WRITEALL,
+    MPI_WRITEATALL,
+    MPI_IWRITEAT,
+    MPI_WRITESH,
+    MPI_IWRITESH,
+    MPI_WRITEORD,
 
-#define READ 		201
-#define WRITE 		202
-#define SEEK 		203
-#define OPEN 		204
-#define CLOSE 		205
-
+    POSIX_OPEN,
+    POSIX_CLOSE,
+    POSIX_READ,
+    POSIX_WRITE,
+    POSIX_SEEK
+};
+    
 #endif
 
