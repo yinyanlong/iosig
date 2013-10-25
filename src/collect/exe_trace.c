@@ -41,21 +41,19 @@ void __attribute__ ((destructor)) trace_end (void) {
         /* Rename EXE traces */
         get_trace_file_path_pid(old_file_path, TRACE_TYPE_EXE);
         get_trace_file_path_rank(new_file_path, TRACE_TYPE_EXE);
-        if(rename(old_file_path, new_file_path) == 0) {
-            printf("%s has been rename %s.\n", old_file_path, new_file_path);
-        } else {
+        if(rename(old_file_path, new_file_path) != 0) {
             fprintf(stderr, "Error renaming %s.\n", old_file_path);
         }
         
         /* Rename POSIX traces */
         get_trace_file_path_pid(old_file_path, TRACE_TYPE_POSIX);
         get_trace_file_path_rank(new_file_path, TRACE_TYPE_POSIX);
-        if(rename(old_file_path, new_file_path) == 0) {
-            printf("%s has been rename %s.\n", old_file_path, new_file_path);
-        } else {
+        if(rename(old_file_path, new_file_path) != 0) {
             fprintf(stderr, "Error renaming %s.\n", old_file_path);
         }
     }
+    
+    /* TODO: translate the EXE traces to readable format */
 }
 
 void __cyg_profile_func_enter (void *func, void *caller) {

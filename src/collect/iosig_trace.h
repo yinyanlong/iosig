@@ -32,7 +32,7 @@
 
 #define MAX_NUM_PROCS 4
 #define MAX_NUM_RTB_ENTRIES 1024
-#define FILE_PATH_LENGTH 128
+#define FILE_PATH_LENGTH 256
 #define IOSIG_MAX_ARG_STRING_SIZE 4096
 
 extern int my_rank;              /* my_rank is initialized in -1, a value larger
