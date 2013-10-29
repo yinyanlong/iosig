@@ -11,3 +11,11 @@ analyzes the trace files and recognizes the data access patterns.
 During our usage of the original IOSIG toolkit in our I/O optimization works,
 we have found some new requirements for IOSIG. We decide to improve IOSIG to a
 new tool called IOSIG+.
+
+More info at:
+    - https://code.google.com/p/iosig/
+    - http://www.cs.iit.edu/~scs/iosig/
+
+Contact:
+    - Yanlong Yin (yinyanlong@gmail.com)
+

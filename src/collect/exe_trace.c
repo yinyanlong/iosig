@@ -20,6 +20,8 @@ void __attribute__ ((constructor)) trace_begin (void) {
     /* initialize POSIX I/O trace file */
     get_trace_file_path_pid(trace_file_path, TRACE_TYPE_POSIX);
     posix_fp = fopen(trace_file_path, "a");
+    fprintf(posix_fp, "# OPER  FH  POS  SIZE  START  END  PATH\n");
+    fprintf(posix_fp, "#--------------------------------------\n");
     
     gettimeofday(&bigbang, NULL);
 }

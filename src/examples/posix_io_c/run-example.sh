@@ -3,6 +3,7 @@
 # build the executable
 make clean
 make
+rm -f hehe_*
 
 # run the executable, this step also generates the 
 # execution tracing file, named exe_pid.out

@@ -8,10 +8,10 @@ V = 0
 AT_0 := @
 AT_1 :=
 AT = $(AT_$(V))
-CC_0 = $(AT)echo "CC $<..."; $(C_COMPILER)
+CC_0 = $(AT)echo "CC $<"; $(C_COMPILER)
 CC_1 = $(C_COMPILER)
 CC = $(CC_$(V))
-FC_0 = $(AT)echo "FC $<..."; $(F_COMPILER)
+FC_0 = $(AT)echo "FC $<"; $(F_COMPILER)
 FC_1 = $(F_COMPILER)
 FC = $(FC_$(V))
 
@@ -50,7 +50,7 @@ all:	trace
 
 trace: $(TRC_OBJS) $(FC_OBJS)
 	@echo "Creating ligiosig.a"; ar rlc libiosig.a $(TRC_OBJS) $(FC_OBJS)
-	@echo "Comleted. Next, make install."
+	@echo "Completed. Next, make install."
 
 install: trace
 	cp libiosig.a ${INSTALL_DIR}/lib
