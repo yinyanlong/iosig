@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#include <unistd.h>
  
 int stream_io(void) {
     char buffer[5] = {'b'};  /* initialized to zeroes */
@@ -26,30 +27,26 @@ int posix_io(void) {
     int file_handlers[5];
     int i = 0;
     int j = 0;
-    mode_t mode = S_IRUSR | S_IWUSR;
+    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH;
 
     /* open */
     for (i = 0; i < 5; i++) {
         sprintf(filename, "./hehe_%d", i);
         file_handlers[i] = open(filename, O_RDWR | O_APPEND | O_CREAT, mode);
-        //file_handlers[i] = open(filename, O_RDWR | O_CREAT, mode);
-        //file_handlers[i] = open(filename, O_WRONLY | O_APPEND | O_CREAT, mode);
     }
 
     /* write */
     int offset;
     for (i = 0; i < 5; i++) {
         offset = lseek(file_handlers[i], 200, SEEK_SET);
-        printf("new offset: %d\n", offset);
+        printf("xxxxxxxxxxxxx      new offset: %d\n", offset);
     }
 
-    /*
     for (i = 0; i < 5; i++) {
         for (j = 0; j<5; j++) {
             write(file_handlers[i], buffer, 5);
         }
     }
-    */
     
     /*
     for (i = 4; i >=0; i--) {
@@ -69,6 +66,15 @@ int posix_io(void) {
         printf("new offset: %d\n", offset);
     }
     */
+    for (i = 0; i < 5; i++) {
+        offset = lseek(file_handlers[i], 0, SEEK_CUR);
+        printf("+++++++++++++++++current offset: %d\n", offset);
+    }
+    for (i = 0; i < 5; i++) {
+        offset = lseek(file_handlers[i], -200, SEEK_CUR);
+        printf("+++++++++++++++++new offset: %d\n", offset);
+    }
+
     for (i = 0; i < 5; i++) {
         for (j = 0; j<5; j++) {
             read(file_handlers[i], read_buffer, 5);

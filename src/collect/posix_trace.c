@@ -1,22 +1,32 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <sys/stat.h>
+#include <errno.h>
 
 #include "iosig_trace.h"
 
+#define IOSIG_ASSERT_TEST 1
+
 typedef struct iosig_posix_file_t {
-    int fh;              /* file handler */
+    int fh;         /* file handler */
+    char lseeked;   /* `lseeked' being 1 means `lseek' has been called.
+                       The consequence `write' call will reset the offset
+                       to `size of the file'. It's set to `1' when lseek
+                       gets called, and reset to `0' when `write' is 
+                       called */
     int oflag;
-    int read_offset;   /* read position */
-    int write_offset;  /* write position */
+    off_t offset;
     struct iosig_posix_file_t * next; /* we use link list for now */
 } iosig_posix_file;
 
 iosig_posix_file * bk_files_list;  /* head pointer of the book keeping 
                                       link list */
 
-void IOSIG_posix_write_log (const char * operation, int fildes, long int position, 
-        long int size, struct timeval * start, struct timeval * end, 
+/*
+ * Format: OP, FD, POS, SIZE, T1, T2, PATH
+ */
+void IOSIG_posix_write_log (const char * operation, int fildes, off_t position, 
+        size_t size, struct timeval * start, struct timeval * end, 
         const char * path) {
     struct timeval diffstart, diffend;
     timeval_diff(&diffstart, start, &bigbang);
@@ -39,6 +49,10 @@ void IOSIG_posix_write_log (const char * operation, int fildes, long int positio
 /*
  * Book keeping for posix file operations.
  */
+
+/* 
+ * Return the newly created entry in the book keeping list.
+ */
 iosig_posix_file * IOSIG_posix_bk_open () {
     if (bk_files_list == NULL) {
         bk_files_list = malloc(sizeof(iosig_posix_file));
@@ -57,6 +71,9 @@ iosig_posix_file * IOSIG_posix_bk_open () {
     }
 }
 
+/* 
+ * Remove the entry identified with `fildes'.
+ */
 void IOSIG_posix_bk_close (int fildes) {
     iosig_posix_file * tmp = bk_files_list;
 
@@ -85,6 +102,9 @@ void IOSIG_posix_bk_close (int fildes) {
     }
 }
 
+/*
+ * Reture the book keeping entry of the given `fildes'.
+ */
 iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
     if (bk_files_list == NULL) {
         return NULL;
@@ -100,26 +120,60 @@ iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
     }
 }
 
-int IOSIG_posix_bk_read (int fildes, size_t nbyte) {
+/*
+ * Update the book keeping entry of the given `fildes'.
+ * The second parameter is the read/write size of this I/O operation.
+ * The return value is the beginning offset of this operation.
+ */
+off_t IOSIG_posix_bk_read (int fildes, size_t nbyte) {
     iosig_posix_file * tmp = IOSIG_posix_get_file_by_fd(fildes);
     if (tmp == NULL) {
         return -1;
-    } else {
-        int ret_val = tmp->read_offset;
-        tmp->read_offset += nbyte;
-        return ret_val;
-    }
+    } 
+    off_t ret_val = tmp->offset;
+    tmp->offset += nbyte;
+
+#if IOSIG_ASSERT_TEST
+    off_t new_offset = lseek(fildes, 0, SEEK_CUR);
+    assert (new_offset == tmp->offset);
+#endif
+
+    return ret_val;
 }
 
-int IOSIG_posix_bk_write (int fildes, size_t nbyte) {
+off_t IOSIG_posix_bk_write (int fildes, size_t nbyte) {
     iosig_posix_file * tmp = IOSIG_posix_get_file_by_fd(fildes);
     if (tmp == NULL) {
         return -1;
-    } else {
-        int ret_val = tmp->write_offset;
-        tmp->write_offset += nbyte;
-        return ret_val;
+    } 
+    if ( (tmp->oflag & O_APPEND) > 0 && tmp->lseeked == 1) {
+        tmp->lseeked = 0;
+        off_t new_offset = lseek(fildes, 0, SEEK_CUR);
+        tmp->offset = new_offset;
+        return (new_offset - nbyte);
     }
+    off_t ret_val = tmp->offset;
+    tmp->offset += nbyte;
+
+#if IOSIG_ASSERT_TEST
+    off_t new_offset = lseek(fildes, 0, SEEK_CUR);
+    assert (new_offset == tmp->offset);
+#endif
+
+    return ret_val;
+}
+
+/* Return value is the old offset before seeking. */
+off_t IOSIG_posix_bk_lseek (int fildes, off_t new_offset) {
+    iosig_posix_file * tmp = IOSIG_posix_get_file_by_fd(fildes);
+    if (tmp == NULL) {
+        return -1;
+    } 
+
+    off_t ret_val = tmp->offset;
+    tmp->offset = new_offset;
+    tmp->lseeked = 1;
+    return ret_val;
 }
 
 /******** declare the real calls ********/
@@ -168,18 +222,20 @@ int __wrap_open(const char *path, int oflag, ... ) {
         gettimeofday(&end, NULL);
     }
 
-    if (ret_val == -1) { /* upon error*/
+    if (ret_val == -1) { /* Upon error.  */
         return ret_val;
     }
     iosig_posix_file * iosig_f = IOSIG_posix_bk_open(); 
     iosig_f->fh = ret_val;
     iosig_f->oflag = oflag;
-    iosig_f->read_offset = 0;
+    iosig_f->offset = 0;
+
+    /* Check on flag `O_APPEND'.  */
     struct stat st;
     if ( (oflag&O_APPEND) > 0 && stat(path, &st)==0 ) {
-        iosig_f->write_offset = st.st_size;
+        iosig_f->offset = st.st_size;
     } else {
-        iosig_f->write_offset = 0;
+        iosig_f->offset = 0;
     }
 
     /* Format: OPEN, file_path, position, size, time1, time2, path */
@@ -210,7 +266,7 @@ ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
         /* TODO: seems O_APPEND does not affect read operations.
          * Check this again
          */
-        int offset = IOSIG_posix_bk_read (fildes, ret_val);
+        off_t offset = IOSIG_posix_bk_read (fildes, ret_val);
         IOSIG_posix_write_log ("READ", fildes, offset, ret_val, &start, &end, NULL);
     }
     return ret_val;
@@ -223,20 +279,32 @@ ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
     gettimeofday(&start, NULL);
     ret_val = __real_write(fildes, buf, nbyte);
     gettimeofday(&end, NULL);
+
     if (ret_val >= 0) {         /* ret_val is actual write bytes */
-        /* TODO: must check whether O_APPEND is in 'oflag'. If it's on, then
+        /* TODO: must check whether O_APPEND is in `oflag'. If it's on, then
          * the offset goes to end, and then write the data 
          */
-        int offset = IOSIG_posix_bk_write (fildes, ret_val);
+        off_t offset = IOSIG_posix_bk_write (fildes, ret_val);
         IOSIG_posix_write_log ("WRITE", fildes, offset, ret_val, &start, &end, NULL);
     }
+
     return ret_val;
 }
 
 off_t __wrap_lseek(int fildes, off_t offset, int whence) {
-    off_t ret_val;
-    ret_val = __real_lseek(fildes, offset, whence);
-    return ret_val;
+    off_t new_offset; /* the new offset */
+    struct timeval start, end;
+
+    gettimeofday(&start, NULL);
+    new_offset = __real_lseek(fildes, offset, whence);
+    gettimeofday(&end, NULL);
+
+    if (offset != 0 && new_offset != -1) {
+        off_t old_offset = IOSIG_posix_bk_lseek (fildes, new_offset);
+        IOSIG_posix_write_log ("LSEEK", fildes, old_offset, new_offset, &start, &end, NULL);
+    }
+
+    return new_offset;
 }
 
 
