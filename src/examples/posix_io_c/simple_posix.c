@@ -5,15 +5,23 @@
 #include <unistd.h>
  
 int stream_io(void) {
+    fpos_t fpos;
+    int i;
     char buffer[5] = {'b'};  /* initialized to zeroes */
-    FILE *fp = fopen("myfile", "w+");
+    printf("-----------------------1-------------------\n");
+    FILE *fp = fopen("./myfile", "w+");
+    printf("-----------------------2-------------------\n");
 
     if (fp == NULL) {
         perror("Failed to open file \"myfile\"");
         return EXIT_FAILURE;
     }
 
-    fwrite(buffer, 1, 5, fp);
+    printf("-----------------------3-------------------\n");
+    for (i = 0; i < 5; i++) {
+        fwrite(buffer, 1, 5, fp);
+    }
+    printf("-----------------------4-------------------\n");
                          
     fclose(fp);
 
@@ -91,8 +99,8 @@ int posix_io(void) {
 }
 
 int main(void) {
-    //stream_io();
-    posix_io();
+    stream_io();
+    //posix_io();
     return 0;
 }
 
