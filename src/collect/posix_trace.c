@@ -30,6 +30,7 @@ iosig_posix_file * bk_files_list;  /* head pointer of the book keeping
  *  POSIX Standard: 6.5 File Control Operations <fcntl.h>
  */
 int __real_open(const char *path, int oflag, ... );
+int __real_open64(const char *path, int oflag, ... );
 /*
  *  POSIX Standard: 2.10 Symbolic Constants     <unistd.h>
  */
@@ -227,11 +228,11 @@ int __wrap_open64(const char *path, int oflag, ... ) {
         va_end(mode_arg);
 
         gettimeofday(&start, NULL);
-        ret_val = __real_open(path, oflag, mode);
+        ret_val = __real_open64(path, oflag, mode);
         gettimeofday(&end, NULL);
     } else {
         gettimeofday(&start, NULL);
-        ret_val = __real_open(path, oflag);
+        ret_val = __real_open64(path, oflag);
         gettimeofday(&end, NULL);
     }
 
