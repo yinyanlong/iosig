@@ -347,6 +347,11 @@ int __wrap_fclose (FILE* stream) {
 
 size_t __wrap_fread(void * ptr, size_t size, size_t nitems, 
         FILE * stream) {
+    if (stream->_fileno < 3) {
+        /* fileno 0, 1, and 2 represent stdin, stdout, stderr  */
+        return __real_fread(ptr, size, nitems, stream);
+    }
+
     struct timeval start, end;
     fpos64_t old_offset;
     fgetpos64(stream, &old_offset); /* TODO: check ret_val of fgetpos  */
@@ -365,6 +370,11 @@ size_t __wrap_fread(void * ptr, size_t size, size_t nitems,
 
 size_t __wrap_fwrite(const void * ptr, size_t size, size_t nitems, 
         FILE * stream) {
+    if (stream->_fileno < 3) {
+        /* fileno 0, 1, and 2 represent stdin, stdout, stderr  */
+        return __real_fwrite(ptr, size, nitems, stream);
+    }
+    
     struct timeval start, end;
     /* stream->_markers is NULL  */
     fpos64_t old_offset;
@@ -374,7 +384,7 @@ size_t __wrap_fwrite(const void * ptr, size_t size, size_t nitems,
     size_t ret_val = __real_fwrite(ptr, size, nitems, stream);
     gettimeofday(&end, NULL);
 
-    if (ret_val > 0) {
+    if (ret_val > 0) { 
         IOSIG_posix_write_log ("FWRITE", stream->_fileno, 
                 old_offset.__pos, 
                 ret_val, &start, &end, NULL); 
