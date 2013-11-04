@@ -1,13 +1,3 @@
-/*
- *      Copyright(c) by Huaiming Song 
- *      Email: huaiming.song@iit.edu
- *      12/16/2009
- *      Illinois Institute of Technology
- *      Scalable Computing Software Laboratory
- *
- * Modified on: 09/20/2011 by Yanlong Yin
- */
-
 #include "mpi.h"
 #include "mpiimpl.h"
 #include "iosig_trace.h"
@@ -27,7 +17,7 @@ int MPI_Init(int *argc, char ***argv)
     init_log(my_rank);
 
     PushIO_RTB_init(thisrank);
-    iorec = malloc(sizeof(PushIO_Trace_record));
+    iorec = malloc(sizeof(iosig_mpiio_trace_record));
     return ret_val;
 }
 

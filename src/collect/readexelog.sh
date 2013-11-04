@@ -27,3 +27,4 @@ while read LINETYPE FADDR CADDR CTIME; do
         echo "Exit  ${FNAME} at ${CTIME}"
     fi
 done < "${TRACELOG}"
+

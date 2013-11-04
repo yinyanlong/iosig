@@ -1,30 +1,3 @@
-/* This file is part of the Server-Push File Access Server (FAS) environment
- *
- *            <<<<  Add more info >>>
- ****************************************************************************
- *
- * Author:      Suren Byna (sbyna@iit.edu)
- *              Illinois Institute of Technology &
- *              Argonne National Laboratory
- * Created on:  03/04/2007
- * Modified on: 03/16/2007 by Suren Byna
- *              03/29/2007 by Suren Byna Added RTB, a linked list implementation
- *                                       of buffer to hold traces. The size of
- *                                       RTB is 1024 for each process. When the
- *                                       limit is reached, overflowing traces are
- *                                       kept in a file corresponding to that process.
- *              09/14/2011 by Yanlong Yin Added the end time of each operation to trace.
- *
- * Funded by:   NSF, Award # CCF-0621435
- *
- * File name: pushio_trace.c
- * Purpose  : Contains tracing functions.
- *	      Currently all traces are written into a file. 
- *	      In future, these traces have to be written into a buffer
- *	      that can be read by another thread, and analize for patterns.
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -71,25 +44,24 @@ void end_log()
 }
 
 /* write log information into a file  */
-void log_read_trace(PushIO_Trace_record * pushio_rec)
+void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
 {
     struct timeval diffstart, diffend;
-    char operation[15];
-    int rank;
-
-    /* find MPI_rank information  */
-    if (!pushio_rec->is_mpi_operation) {
-        rank = -1;
-    } else {
-        rank = pushio_rec->mpi_rank;
-    }
+    char operation[20];
 
     if (!out_fp) {
         fprintf(stderr,
                 "Pointer to log file doesn't exist in log_read_trace. Opening now. \n");
 
+        int rank;
+        /* find MPI_rank information  */
+        if (!pushio_rec->is_mpi_operation) {
+            rank = -1;
+        } else {
+            rank = pushio_rec->mpi_rank;
+        }
         /* TODO: consider removing the following 3 lines */
-        char filename_rank[25];
+        char filename_rank[30];
         sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
         out_fp = fopen(filename_rank, "a");
     }
@@ -97,12 +69,20 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     get_operation(operation, pushio_rec->operation);
+    sprintf(logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n",
+            operation, pushio_rec->filedes, 
+            pushio_rec->file_pos, pushio_rec->data_size,
+            (long) diffstart.tv_sec, (long) diffstart.tv_usec,
+            (long) diffend.tv_sec, (long) diffend.tv_usec);
 
+
+    /*
     fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %20s   %6ld.%06ld\n",
             getpid(), rank, pushio_rec->filedes, pushio_rec->file_pos,
             pushio_rec->data_size, (long) diffstart.tv_sec,
             (long) diffstart.tv_usec, operation, (long)diffend.tv_sec,
             (long) diffend.tv_usec);
+            */
     return;
 }
 
@@ -110,7 +90,7 @@ void log_read_trace(PushIO_Trace_record * pushio_rec)
 
 /* log trace records into a buffer called RTB.   */
 
-void PushIO_RTB_log(int rank, PushIO_Trace_record * pushio_rec)
+void PushIO_RTB_log(int rank, iosig_mpiio_trace_record * pushio_rec)
 {
     PushIO_RTB_node *rtb_node;
     PushIO_RTB_node *temp_node;
@@ -242,7 +222,7 @@ int PushIO_RTB_finalize(int rank)
 
 /* backup trace records into a file when an RTB is full  */
 
-int PushIO_RTB_backup(int rank, PushIO_Trace_record pushio_rec)
+int PushIO_RTB_backup(int rank, iosig_mpiio_trace_record pushio_rec)
 {
     char operation[15];
 

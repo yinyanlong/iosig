@@ -1,13 +1,3 @@
-/*
- *	Copyright(c) by Huaiming Song 
- *	Email: huaiming.song@iit.edu
- *	12/16/2009
- *	Illinois Institute of Technology
- *	Scalable Computing Software Laboratory
- *
- * Modified on: 09/14/2011 by Yanlong Yin
- */
-
 #include "mpioimpl.h"
 #include "mpiimpl.h"
 #include "iosig_trace.h"
@@ -93,8 +83,8 @@ int MPI_File_read_ordered(MPI_File mpi_fh, void *buf, int count,
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
 
-    log_read_trace(iorec);
-    PushIO_RTB_log(thisrank, iorec);
+    IOSIG_mpiio_write_log(iorec);
+    //PushIO_RTB_log(thisrank, iorec);
 
 fn_exit:
     MPIR_Nest_decr();

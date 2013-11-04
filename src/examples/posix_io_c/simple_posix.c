@@ -23,6 +23,7 @@ int stream_io(void) {
     }
     printf("-----------------------4-------------------\n");
                          
+    fprintf(fp, "bbbbb");
     fclose(fp);
 
     return EXIT_SUCCESS;

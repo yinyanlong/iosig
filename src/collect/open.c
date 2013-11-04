@@ -1,24 +1,3 @@
-/* This file is part of the Server-Push File Access Server (FAS) environment
- *
- *            <<<<  Add more info >>>
- ****************************************************************************
- *
- * Author:      Suren Byna (sbyna@iit.edu)
- *              Illinois Institute of Technology &
- *              Argonne National Laboratory
- * Created on:  03/09/2007
- * Modified on: 03/16/2007 by Suren Byna
- *
- * Funded by:   NSF, Award # CCF-0621435
- *
- * File name: pushio_init.c
- * Purpose  : Wrapper function for MPI_Init ()
- *            Initiates tracing.
- *
- * Modified on: 12/16/2009 by Huaiming Song
- *              09/14/2011 by Yanlong Yin
- */
-
 #include <string.h>
 #include "mpioimpl.h"
 #include "mpiimpl.h"
@@ -43,8 +22,8 @@ int MPI_File_open(MPI_Comm comm, char *filename, int amode,
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
 
-    log_read_trace(iorec);
-    PushIO_RTB_log(thisrank, iorec);
+    IOSIG_mpiio_write_log(iorec);
+    //PushIO_RTB_log(thisrank, iorec);
 
     return ret_val;
 }
