@@ -25,10 +25,12 @@ void init_log(int rank) {
                 "Pointer to log file doesn't exist in init_log \n");
         exit(1);
     } else {
+        /* TODO: do not use fprintf. Use sprintf+fwrite, or else better.
         fprintf(out_fp,
                 "\nProc ID  MPI_Rank   File #     File Pos \t # of Bytes \t Time(s)     I/O Op   EndTime(s)\n");
         fprintf(out_fp,
                 "===================================================================================== \n");
+                */
     }
     return;
 }
@@ -69,11 +71,12 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     get_operation(operation, pushio_rec->operation);
-    sprintf(logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n",
+    sprintf(mpiio_logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n",
             operation, pushio_rec->filedes, 
             pushio_rec->file_pos, pushio_rec->data_size,
             (long) diffstart.tv_sec, (long) diffstart.tv_usec,
             (long) diffend.tv_sec, (long) diffend.tv_usec);
+    __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
 
 
     /*
@@ -132,7 +135,7 @@ void PushIO_RTB_log(int rank, iosig_mpiio_trace_record * pushio_rec)
         case (MPI_WRITEORD):
         case (POSIX_READ):
         case (POSIX_WRITE):
-        case (POSIX_SEEK):
+        case (POSIX_LSEEK):
             rtb_node->rtb_entry.operation = pushio_rec->operation;
             break;
         default:
@@ -425,7 +428,7 @@ void get_operation(char *operation, int rec_operation)
         case (MPI_WRITEORD):
             sprintf(operation, "MPI_WRITEORD");
             break;
-        case (POSIX_SEEK):
+        case (POSIX_LSEEK):
             sprintf(operation, "POSIX_SEEK");
             break;
         case (POSIX_READ):

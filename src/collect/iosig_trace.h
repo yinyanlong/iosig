@@ -1,23 +1,3 @@
-/* This file is part of the Server-Push File Access Server (FAS) environment
- *
- *            <<<<  Add more info >>>
- ****************************************************************************
- *
- * Author:      Suren Byna (sbyna@iit.edu)
- *              Illinois Institute of Technology &
- *              Argonne National Laboratory
- * Created on:  03/04/2007
- * Modified on: 03/16/2007 by Suren Byna
- *		03/26/2007 by Suren Byna, to add RTB
- *              09/14/2011 by Yanlong Yin, to add op_end_time
- *
- * Funded by:   NSF, Award # CCF-0621435
- *
- * File name: pushio_trace.h
- * Purpose  : 
- *
- */
-
 #ifndef PUSHIO_TRACE_H
 #define PUSHIO_TRACE_H
 
@@ -60,34 +40,23 @@ typedef struct iosig_mpiio_trace_record_t {
     struct timeval op_end_time;
 } iosig_mpiio_trace_record;
 
-/* declare pointers to IO Request Trace Buffers.
-   * One buffer for each process.
-   * Implemented as doubly linked lists */
 
-typedef struct PushIO_RTB_node_t {
-    struct PushIO_RTB_node_t *prev_rtb_node;
-    iosig_mpiio_trace_record rtb_entry;
-    struct PushIO_RTB_node_t *next_rtb_node;
-} PushIO_RTB_node;
-
-PushIO_RTB_node *iortb_head;
-PushIO_RTB_node *iortb_tail;
-
-char logtext[512];    /* Pre define this variable here so the *_write_log()
+char mpiio_logtext[512];    /* Pre define this variable here so the *_write_log()
                          do not need to create it each time  */
+char posix_logtext[512];
 
 iosig_mpiio_trace_record *iorec;   /* TODO: this is not thread safe.  */
 int thisrank;
 
 /******** Declare the real POSIX calls ********/
 /*
- *  *  POSIX Standard: 6.5 File Control Operations <fcntl.h>
- *   */
+ * POSIX Standard: 6.5 File Control Operations <fcntl.h>
+ */
 int __real_open(const char *path, int oflag, ... );
 int __real_open64(const char *path, int oflag, ... );
 /*
- *  *  POSIX Standard: 2.10 Symbolic Constants     <unistd.h>
- *   */
+ * POSIX Standard: 2.10 Symbolic Constants     <unistd.h>
+ */
 int __real_close(int fildes);
 ssize_t __real_read(int fildes, void *buf, size_t nbyte);
 ssize_t __real_write(int fildes, const void *buf, size_t nbyte);
@@ -99,29 +68,14 @@ ssize_t __real_pread64(int fildes, void *buf, size_t nbyte, off64_t offset);
 ssize_t __real_pwrite64(int fildes, const void *buf, size_t nbyte, off64_t offset);
 
 /*
- *  *  ISO C99 Standard: 7.19 Input/output <stdio.h>
- *   */
+ * ISO C99 Standard: 7.19 Input/output <stdio.h>
+ */
 FILE* __real_fopen (const char *path, const char *mode);
 FILE* __real_fopen64 (const char *path, const char *mode);
 int __real_fclose (FILE *stream);
 size_t __real_fread (void * ptr, size_t size, size_t nitems, FILE * stream);
 size_t __real_fwrite (const void * ptr, size_t size, size_t nitems, FILE * stream);
 int __real_fseek (FILE *stream, long offset, int whence);
-
-
-
-/* Maintain the number of entries in an RTB corresponding to a process  */
-int num_entries;
-
-/* PushIO RTB doubly linked list functions */
-
-int PushIO_RTB_init(int rank);
-void PushIO_RTB_log(int rank, iosig_mpiio_trace_record * pushio_rec);
-int PushIO_RTB_backup(int rank, iosig_mpiio_trace_record pushio_rec);
-int PushIO_RTB_remove(int rank, PushIO_RTB_node * rtb_node);
-int PushIO_RTB_dump_trace(int rank);
-int PushIO_RTB_file_traces(int rank);
-int PushIO_RTB_finalize(int rank);
 
 void init_log(int rank);
 void end_log();
@@ -166,8 +120,40 @@ enum iosig_io_operation {
     POSIX_CLOSE,
     POSIX_READ,
     POSIX_WRITE,
-    POSIX_SEEK
+    POSIX_LSEEK,
+
+    POSIX_FOPEN,
+    POSIX_FCLOSE,
+    POSIX_FREAD,
+    POSIX_FWRITE,
+    POSIX_FSEEK
 };
     
+
+/* declare pointers to IO Request Trace Buffers.
+   * One buffer for each process.
+   * Implemented as doubly linked lists */
+
+typedef struct PushIO_RTB_node_t {
+    struct PushIO_RTB_node_t *prev_rtb_node;
+    iosig_mpiio_trace_record rtb_entry;
+    struct PushIO_RTB_node_t *next_rtb_node;
+} PushIO_RTB_node;
+
+PushIO_RTB_node *iortb_head;
+PushIO_RTB_node *iortb_tail;
+/* Maintain the number of entries in an RTB corresponding to a process  */
+int num_entries;
+
+/* PushIO RTB doubly linked list functions */
+
+int PushIO_RTB_init(int rank);
+void PushIO_RTB_log(int rank, iosig_mpiio_trace_record * pushio_rec);
+int PushIO_RTB_backup(int rank, iosig_mpiio_trace_record pushio_rec);
+int PushIO_RTB_remove(int rank, PushIO_RTB_node * rtb_node);
+int PushIO_RTB_dump_trace(int rank);
+int PushIO_RTB_file_traces(int rank);
+int PushIO_RTB_finalize(int rank);
+
 #endif
 

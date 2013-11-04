@@ -16,7 +16,7 @@ int MPI_Init(int *argc, char ***argv)
     my_rank = thisrank;
     init_log(my_rank);
 
-    PushIO_RTB_init(thisrank);
+    //PushIO_RTB_init(thisrank);
     iorec = malloc(sizeof(iosig_mpiio_trace_record));
     return ret_val;
 }

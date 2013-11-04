@@ -25,41 +25,6 @@ iosig_posix_file * bk_files_list;  /* head pointer of the book keeping
                                    /* TODO: make the access to bk_files_list
                                     * thread safe by adding locks.  */
 
-/******** declare the real calls ********/
-/*
- *  POSIX Standard: 6.5 File Control Operations <fcntl.h>
- */
-/*
-int __real_open(const char *path, int oflag, ... );
-int __real_open64(const char *path, int oflag, ... );
-*/
-/*
- *  POSIX Standard: 2.10 Symbolic Constants     <unistd.h>
- */
-/*
-int __real_close(int fildes);
-ssize_t __real_read(int fildes, void *buf, size_t nbyte);
-ssize_t __real_write(int fildes, const void *buf, size_t nbyte);
-off_t __real_lseek(int fildes, off_t offset, int whence);
-off_t __real_lseek64(int fildes, off_t offset, int whence);
-ssize_t __real_pread(int fildes, void *buf, size_t nbyte, off_t offset);
-ssize_t __real_pwrite(int fildes, const void *buf, size_t nbyte, off_t offset);
-ssize_t __real_pread64(int fildes, void *buf, size_t nbyte, off64_t offset);
-ssize_t __real_pwrite64(int fildes, const void *buf, size_t nbyte, off64_t offset);
-*/
-
-/*
- *  ISO C99 Standard: 7.19 Input/output <stdio.h>
- */
-/*
-FILE* __real_fopen (const char *path, const char *mode);
-FILE* __real_fopen64 (const char *path, const char *mode);
-int __real_fclose (FILE *stream);
-size_t __real_fread (void * ptr, size_t size, size_t nitems, FILE * stream);
-size_t __real_fwrite (const void * ptr, size_t size, size_t nitems, FILE * stream);
-int __real_fseek (FILE *stream, long offset, int whence);
-*/
-
 /*
  * Format: OP, FD, POS, SIZE, T1, T2, PATH
  */
@@ -72,17 +37,17 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
     /* Format: OPEN, file_path, position, size, time1, time2 */
 
     if (path) {
-        sprintf(logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld %s\n", 
+        sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld %s\n", 
                 operation, fildes, position, size,
                 (long) diffstart.tv_sec, (long) diffstart.tv_usec, 
                 (long) diffend.tv_sec, (long) diffend.tv_usec, path);
-        __real_fwrite(logtext, strlen(logtext), 1, posix_fp);
+        __real_fwrite(posix_logtext, strlen(posix_logtext), 1, posix_fp);
     } else {
-        sprintf(logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n", 
+        sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n", 
                 operation, fildes, position, size,
                 (long) diffstart.tv_sec, (long) diffstart.tv_usec, 
                 (long)diffend.tv_sec, (long) diffend.tv_usec);
-        __real_fwrite(logtext, strlen(logtext), 1, posix_fp);
+        __real_fwrite(posix_logtext, strlen(posix_logtext), 1, posix_fp);
     }
 }
 
