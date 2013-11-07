@@ -13,7 +13,7 @@ int my_rank = -1;
  */
 void __attribute__ ((constructor)) trace_begin (void) {
     char trace_file_path[FILE_PATH_LENGTH];
-    char logtext[80];
+    char exe_logtext[80];
 
     /* initialize execution trace file */
     get_trace_file_path_pid(trace_file_path, TRACE_TYPE_EXE);
@@ -23,10 +23,10 @@ void __attribute__ ((constructor)) trace_begin (void) {
     /* initialize POSIX I/O trace file */
     get_trace_file_path_pid(trace_file_path, TRACE_TYPE_POSIX);
     posix_fp = __real_fopen64((char*)trace_file_path, (char*)"a");
-    sprintf(logtext, "# OPER  FH  POS  SIZE  START  END  PATH\n");
-    __real_fwrite(logtext, strlen(logtext), 1, posix_fp);
-    sprintf(logtext, "#--------------------------------------\n");
-    __real_fwrite(logtext, strlen(logtext), 1, posix_fp);
+    sprintf(exe_logtext, "# OPER  FH  POS  SIZE  START  END  PATH\n");
+    __real_fwrite(exe_logtext, strlen(exe_logtext), 1, posix_fp);
+    sprintf(exe_logtext, "#--------------------------------------\n");
+    __real_fwrite(exe_logtext, strlen(exe_logtext), 1, posix_fp);
     //fprintf(posix_fp, "# OPER  FH  POS  SIZE  START  END  PATH\n");
     //fprintf(posix_fp, "#--------------------------------------\n");
     
@@ -66,27 +66,27 @@ void __attribute__ ((destructor)) trace_end (void) {
 }
 
 void __cyg_profile_func_enter (void *func, void *caller) {
-    char logtext[80];
+    char exe_logtext[80];
     if(exe_fp != NULL) {
         struct timeval current, difftime;
         gettimeofday(&current, NULL);
         timeval_diff(&difftime, &current, &bigbang);
         //fprintf(exe_fp, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
-        sprintf(logtext, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
-        __real_fwrite(logtext, strlen(logtext), 1, exe_fp);
+        sprintf(exe_logtext, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
+        __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
 }
 
 void __cyg_profile_func_exit (void *func, void *caller) {
-    char logtext[80];
+    char exe_logtext[80];
     if (exe_fp != NULL) {
         struct timeval current, difftime;
         gettimeofday(&current, NULL);
         timeval_diff(&difftime, &current, &bigbang);
 
         //fprintf(exe_fp, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
-        sprintf(logtext, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
-        __real_fwrite(logtext, strlen(logtext), 1, exe_fp);
+        sprintf(exe_logtext, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
+        __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
 }
 

@@ -44,6 +44,7 @@ typedef struct iosig_mpiio_trace_record_t {
 char mpiio_logtext[512];    /* Pre define this variable here so the *_write_log()
                          do not need to create it each time  */
 char posix_logtext[512];
+char exe_logtext[512];
 
 iosig_mpiio_trace_record *iorec;   /* TODO: this is not thread safe.  */
 int thisrank;
