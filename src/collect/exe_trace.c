@@ -71,7 +71,6 @@ void __cyg_profile_func_enter (void *func, void *caller) {
         struct timeval current, difftime;
         gettimeofday(&current, NULL);
         timeval_diff(&difftime, &current, &bigbang);
-        //fprintf(exe_fp, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         sprintf(exe_logtext, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
@@ -84,7 +83,6 @@ void __cyg_profile_func_exit (void *func, void *caller) {
         gettimeofday(&current, NULL);
         timeval_diff(&difftime, &current, &bigbang);
 
-        //fprintf(exe_fp, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         sprintf(exe_logtext, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
