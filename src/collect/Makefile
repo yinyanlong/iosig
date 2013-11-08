@@ -1,5 +1,5 @@
-MPIPATH         = /your/path/to/mpich2-configured-source-code/
-INSTALL_DIR     = /your/path/to/mpich2-install/
+MPIPATH		= /export/home/yyin/common/program_files/mpich2-1.4.1p1
+INSTALL_DIR	= /export/home/yyin/install
 
 C_COMPILER	= gcc
 F_COMPILER	= gfortran
@@ -8,10 +8,10 @@ V = 0
 AT_0 := @
 AT_1 :=
 AT = $(AT_$(V))
-CC_0 = $(AT)echo "CC $<..."; $(C_COMPILER)
+CC_0 = $(AT)echo "CC $<"; $(C_COMPILER)
 CC_1 = $(C_COMPILER)
 CC = $(CC_$(V))
-FC_0 = $(AT)echo "FC $<..."; $(F_COMPILER)
+FC_0 = $(AT)echo "FC $<"; $(F_COMPILER)
 FC_1 = $(F_COMPILER)
 FC = $(FC_$(V))
 
@@ -20,6 +20,8 @@ TRC_OBJS	= $(TRC_SRCS:.c=.o)
 
 FC_SRCS    = $(wildcard *.f)
 FC_OBJS    = $(FC_SRCS:.f=.o)
+
+IOSIG_WRAP_FLAGS = -Wl,-wrap,fopen,-wrap,fopen64,-wrap,fclose,-wrap,fread,-wrap,fwrite,-wrap,fseek,-wrap,open,-wrap,close,-wrap,read,-wrap,write,-wrap,lseek,-wrap,lseek64,-wrap,open64
 
 DFLAGS	:= $(DFLAGS) -DFORTRANDOUBLEUNDERSCORE
 DFLAGS	:= $(DFLAGS) -D_LARGEFILE64_SOURCE
@@ -37,6 +39,8 @@ CFLAGS	:= $(CFLAGS) -I${MPIPATH}/src/include                          # mpiimpl.
 CFLAGS	:= $(CFLAGS) -I${MPIPATH}/src/mpl/include                      # mpl.h
 CFLAGS	:= $(CFLAGS) -I${MPIPATH}/src/util/wrappers                    # mpiu_process_wrappers.h
 CFLAGS	:= $(CFLAGS) -I${MPIPATH}/src/mpi/romio/mpi-io                 # mpioimpl.h
+CFLAGS	:= $(CFLAGS) -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+#CFLAGS	:= $(CFLAGS) $(IOSIG_WRAP_FLAGS)
 
 FCFLAGS	:=
 
@@ -50,7 +54,7 @@ all:	trace
 
 trace: $(TRC_OBJS) $(FC_OBJS)
 	@echo "Creating ligiosig.a"; ar rlc libiosig.a $(TRC_OBJS) $(FC_OBJS)
-	@echo "Comleted. Next, make install."
+	@echo "Completed. Next, make install."
 
 install: trace
 	cp libiosig.a ${INSTALL_DIR}/lib
