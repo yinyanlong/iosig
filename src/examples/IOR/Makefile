@@ -37,7 +37,7 @@ mpiio: $(OBJS) aiori-POSIX.o aiori-MPIIO.o aiori-noHDF5.o aiori-noNCMPI.o
 		$(LDFLAGS) 
 
 clean:
-	-rm -f *.o IOR exe*.out mpiio*.out posix*.out
+	-rm -f *.o IOR exe*.out mpiio*.out posix*.out trace*.out
 
 aiori-MPIIO.o: aiori-MPIIO.c
 	$(CC) -c aiori-MPIIO.c
