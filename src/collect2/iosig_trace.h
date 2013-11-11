@@ -10,6 +10,7 @@
 #include <fcntl.h>
 #include <sys/time.h>
 #include <assert.h>
+#include <execinfo.h>
 
 #define MAX_NUM_PROCS 4
 #define MAX_NUM_RTB_ENTRIES 1024
@@ -86,6 +87,7 @@ int timeval_diff(struct timeval *result, struct timeval *x,
 void get_operation(char *operation, int rec_operation);
 void get_trace_file_path_pid(char *path, int trace_type);
 void get_trace_file_path_rank(char *path, int trace_type);
+void IOSIG_backtrace();
 
 enum iosig_trace_type {
     TRACE_TYPE_EXE = 1,

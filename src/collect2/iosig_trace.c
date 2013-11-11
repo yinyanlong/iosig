@@ -70,15 +70,25 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
             (long) diffend.tv_sec, (long) diffend.tv_usec);
     __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
 
-
-    /*
-    fprintf(out_fp, "%d %6d %6d  %12ld  %12ld    %6ld.%06ld  %20s   %6ld.%06ld\n",
-            getpid(), rank, pushio_rec->filedes, pushio_rec->file_pos,
-            pushio_rec->data_size, (long) diffstart.tv_sec,
-            (long) diffstart.tv_usec, operation, (long)diffend.tv_sec,
-            (long) diffend.tv_usec);
-            */
     return;
+}
+
+void IOSIG_backtrace() {
+#define BACK_TRACE_SIZE 512
+    int i, nptrs;
+    void *bt_buffer[BACK_TRACE_SIZE];
+    char **strings;
+
+    nptrs = backtrace(bt_buffer, BACK_TRACE_SIZE);
+    printf("IOSIG backtraced %d addresses.\n", nptrs);
+    strings = backtrace_symbols(bt_buffer, nptrs);
+    if (strings == NULL) {
+        return;
+    }
+    for (i = 0; i < nptrs; i++) {
+        printf("%s\n", strings[i]);
+    }
+    free(strings);
 }
 
 /********** RTB related functions  *************************/

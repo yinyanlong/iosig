@@ -3,7 +3,6 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
-#include <execinfo.h>
 #include <pthread.h>
 
 #include "iosig_trace.h"
@@ -28,7 +27,7 @@ static iosig_posix_file * bk_files_list;  /* head pointer of the book keeping
                                              link list */
 
 /*
- * Format: OP, FD, POS, SIZE, T1, T2, PATH
+ * Format: OPER, FD, POS, SIZE, T1, T2, [PATH]
  */
 void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position, 
         size_t size, struct timeval * start, struct timeval * end, 
@@ -215,26 +214,6 @@ int __wrap_open64(const char *path, int oflag, ... ) {
     int ret_val;
     struct timeval start, end;
     
-#if 0
-    /*********************** backtrace *********************/
-#define BACK_TRACE_SIZE 512
-    int j, nptrs;
-    void *bt_buffer[BACK_TRACE_SIZE];
-    char **strings;
-
-    nptrs = backtrace(bt_buffer, BACK_TRACE_SIZE);
-    printf("backtrace() returned %d addresses\n", nptrs);
-    strings = backtrace_symbols(bt_buffer, nptrs);
-    if (strings == NULL) {
-        printf("NULL NULL NULL NULL NULL\n");
-    }
-    for (j = 0; j < nptrs; j++) {
-        printf("%s\n", strings[j]);
-    }
-    free(strings);
-    /*********************** backtrace *********************/
-#endif
-
     /* check whether there is the 3rd arg */
     if (oflag & O_CREAT) {
         va_list mode_arg;
@@ -415,7 +394,7 @@ size_t __wrap_fwrite(const void * ptr, size_t size, size_t nitems,
     }
     
     struct timeval start, end;
-    /* stream->_markers is NULL  */
+    /* XXX note: stream->_markers is NULL  */
     fpos64_t old_offset;
     fgetpos64(stream, &old_offset); /* TODO: check ret_val of fgetpos  */
 
