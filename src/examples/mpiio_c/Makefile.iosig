@@ -1,0 +1,25 @@
+#!/bin/bash
+
+MPI_HOME     = /export/home/yyin/install
+CC           = mpicc
+
+IOSIG_CFLAGS   += -w -finstrument-functions -D_FILE_OFFSET_BITS=64
+IOSIG_LDFLAGS  += -L../../collect -liosig
+IOSIG_LDFLAGS  += -Wl,-wrap,fopen,-wrap,fopen64,-wrap,fclose,-wrap,fread,-wrap,fwrite,-wrap,fseek,-wrap,open,-wrap,close,-wrap,read,-wrap,write,-wrap,lseek,-wrap,lseek64,-wrap,open64
+
+CFLAGS      += ${IOSIG_CFLAGS}
+LDFLAGS     += ${IOSIG_LDFLAGS}
+
+EXECS        = example
+
+all: $(EXECS)
+
+example: example.o
+	$(CC) -o $@ $^ $(LDFLAGS) 
+
+clean:
+	rm -f *.o
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
