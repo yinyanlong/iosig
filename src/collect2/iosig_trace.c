@@ -8,29 +8,20 @@
 #include <assert.h>
 #include "iosig_trace.h"
 
-
-/********************
-  Logging functions, using a file. These functions will be removed and replaced by RTB
-  related functions, ultimately.
- ********************/
-
 /* Initialize log file  */
 void init_log(int rank) {
     char filename_rank[25];
     sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
 
-    out_fp = fopen(filename_rank, "a");
+    out_fp = __real_fopen(filename_rank, "a");
     if (!out_fp) {
-        fprintf(stderr,
-                "Pointer to log file doesn't exist in init_log \n");
+        perror("Pointer to log file doesn't exist in init_log \n");
         exit(1);
     } else {
-        /* TODO: do not use fprintf. Use sprintf+fwrite, or else better.
-        fprintf(out_fp,
-                "\nProc ID  MPI_Rank   File #     File Pos \t # of Bytes \t Time(s)     I/O Op   EndTime(s)\n");
-        fprintf(out_fp,
-                "===================================================================================== \n");
-                */
+        sprintf(mpiio_logtext, "# OPER  FH  POS  SIZE  START  END  PATH\n");
+        __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
+        sprintf(mpiio_logtext, "#--------------------------------------\n");
+        __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
     }
     return;
 }
@@ -39,7 +30,8 @@ void init_log(int rank) {
 void end_log()
 {
     if (out_fp) {
-        fprintf(out_fp, "\nEnd of trace \n");
+        sprintf(mpiio_logtext, "#---------- END OF TRACE --------------\n");
+        __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
         fclose(out_fp);
     }
     return;
