@@ -29,6 +29,7 @@ DFLAGS	:= $(DFLAGS) -DHAVE_ROMIOCONF_H
 
 COMMON_CFLAGS	:= $(DFLAGS) -I${INSTALL_DIR}/include
 COMMON_CFLAGS	:= $(COMMON_CFLAGS) -I${INSTALL_DIR}/include
+COMMON_CFLAGS	:= $(COMMON_CFLAGS) -lpthread
 
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/ch3/include                 # mpidpost.h
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/datatype             # mpid_datatype.h

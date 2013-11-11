@@ -3,6 +3,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <errno.h>
+#include <execinfo.h>
+#include <pthread.h>
 
 #include "iosig_trace.h"
 
@@ -15,12 +17,14 @@ typedef struct iosig_posix_file_t {
                        to `size of the file'. It's set to `1' when lseek
                        gets called, and reset to `0' when `write' is 
                        called */
+    int user_account; /* how many users opened this file */
     int oflag;
     off64_t offset;
     struct iosig_posix_file_t * next; /* we use link list for now */
 } iosig_posix_file;
 
-iosig_posix_file * bk_files_list;  /* head pointer of the book keeping 
+pthread_mutex_t bk_files_list_mutex = PTHREAD_MUTEX_INITIALIZER;
+static iosig_posix_file * bk_files_list;  /* head pointer of the book keeping 
                                       link list */
                                    /* TODO: make the access to bk_files_list
                                     * thread safe by adding locks.  */
@@ -55,21 +59,48 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
  * Book keeping for posix file operations.
  */
 
+/*
+ * Print the whole book keeping list
+ */
+void IOSIG_bk_list_dump (int fildes) {
+    //pthread_mutex_lock(&bk_files_list_mutex);
+    if (bk_files_list == NULL) {
+        printf("List is empty!\n");
+        //pthread_mutex_unlock(&bk_files_list_mutex);
+        return;
+    } else {
+        iosig_posix_file * tmp;
+        int i = 1;
+        tmp = bk_files_list;
+        do {
+            printf("fildes[%d] = %d, %d\n", i, tmp->fh, (tmp->fh==fildes)?1:0);
+            tmp = tmp->next;
+            ++i;
+        } while (tmp);
+        //pthread_mutex_unlock(&bk_files_list_mutex);
+    }
+    printf("End of list dumping.\n");
+}
+
 /* 
  * Return the newly created entry in the book keeping list.
  */
-iosig_posix_file * IOSIG_posix_bk_open () {
-    if (bk_files_list == NULL) {
+iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
+    //if (bk_files_list == NULL) {
+    if (!bk_files_list) {
+        printf(" the first !!!!!!!!!!!!!\n");
         bk_files_list = malloc(sizeof(iosig_posix_file));
+        bk_files_list->next = NULL;
         return bk_files_list;
     } else {
+        printf(" adding new !!!!!!!!!!!!!\n");
         iosig_posix_file * tmp;
         tmp = bk_files_list;
-        while (tmp->next != NULL) {
+        do {
             tmp = tmp->next;
-        }
-        tmp->next = malloc(sizeof(iosig_posix_file));
-        tmp = tmp->next;
+        } while (tmp);
+        tmp = malloc(sizeof(iosig_posix_file));
+        //tmp = tmp->next;
         tmp->next=NULL;
 
         return tmp;
@@ -189,6 +220,27 @@ off64_t IOSIG_posix_bk_lseek (int fildes, off64_t new_offset) {
 int __wrap_open64(const char *path, int oflag, ... ) {
     int ret_val;
     struct timeval start, end;
+    printf("-------------------wrap_open64-------called by %d\n", getpid());
+    printf("path: %s\n", path);
+    
+    /*********************** backtrace *********************/
+#define BACK_TRACE_SIZE 512
+    int j, nptrs;
+    void *bt_buffer[BACK_TRACE_SIZE];
+    char **strings;
+
+    nptrs = backtrace(bt_buffer, BACK_TRACE_SIZE);
+    printf("backtrace() returned %d addresses\n", nptrs);
+    strings = backtrace_symbols(bt_buffer, nptrs);
+    if (strings == NULL) {
+        printf("NULL NULL NULL NULL NULL\n");
+    }
+    for (j = 0; j < nptrs; j++) {
+        printf("%s\n", strings[j]);
+    }
+    free(strings);
+    
+    /*********************** backtrace *********************/
 
     /* check whether there is the 3rd arg */
     if (oflag & O_CREAT) {
@@ -205,11 +257,15 @@ int __wrap_open64(const char *path, int oflag, ... ) {
         ret_val = __real_open64(path, oflag);
         gettimeofday(&end, NULL);
     }
-
+    printf("------------> ret_val: %d\n", ret_val);
+ 
     if (ret_val == -1) { /* Upon error.  */
         return ret_val;
-    }
-    iosig_posix_file * iosig_f = IOSIG_posix_bk_open(); 
+    } 
+    pthread_mutex_lock(&bk_files_list_mutex);
+    printf("---------> before bk\n");
+    iosig_posix_file * iosig_f = IOSIG_posix_bk_open(ret_val); 
+    printf("---------> after bk\n");
     iosig_f->fh = ret_val;
     iosig_f->oflag = oflag;
     iosig_f->offset = 0;
@@ -224,9 +280,12 @@ int __wrap_open64(const char *path, int oflag, ... ) {
 
     /* Format: OPEN, file_path, position, size, time1, time2, path */
     IOSIG_posix_write_log ("OPEN", iosig_f->fh, 0, 0, &start, &end, path);
+    pthread_mutex_unlock(&bk_files_list_mutex);
     return ret_val;
 }
 int __wrap_open(const char *path, int oflag, ... ) {
+    printf("-------------------wrap_open-------called by %d\n", getpid());
+    printf("path: %s\n", path);
     if (oflag & O_CREAT) {
         va_list mode_arg;
         va_start(mode_arg, oflag);
@@ -318,6 +377,8 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
 
 
 FILE* __wrap_fopen64 (const char *path, const char *mode) {
+    printf("-------------------wrap_fopen64-------called by %d\n", getpid());
+    printf("path: %s\n", path);
     FILE * ret_val;
     struct timeval start, end;
 
@@ -329,6 +390,8 @@ FILE* __wrap_fopen64 (const char *path, const char *mode) {
     return ret_val;
 }
 FILE* __wrap_fopen (const char *path, const char *mode) {
+    printf("-------------------wrap_fopen-------called by %d\n", getpid());
+    printf("path: %s\n", path);
     return __wrap_fopen64(path, mode);
 }
 

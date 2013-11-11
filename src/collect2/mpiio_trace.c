@@ -9,17 +9,21 @@ int MPI_File_open(MPI_Comm comm, char *filename, int amode,
     int ret_val;
     struct timeval start, end;
     gettimeofday(&start, NULL);
-    iorec->is_mpi_operation = 1;
-    iorec->mpi_rank = thisrank;
-    iorec->filedes = 0;		/*  THIS HAS TO BE FIXED   */
-    iorec->data_size = 0;
-    iorec->op_time = start;
-    iorec->operation = MPI_OPEN;
 
     printf("Before PMPI_File_open\n");
     ret_val = PMPI_File_open(comm, filename, amode, info, fh);
     printf("After PMPI_File_open\n");
 
+    iorec->is_mpi_operation = 1;
+    iorec->mpi_rank = thisrank;
+    if (fh) {
+        iorec->filedes = (*fh)->fd_sys;
+    } else {
+        iorec->filedes = 0;		/* FIXME  */
+    }
+    iorec->data_size = 0;
+    iorec->op_time = start;
+    iorec->operation = MPI_OPEN;
     iorec->file_pos = 0;
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
