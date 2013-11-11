@@ -129,7 +129,6 @@ main(int     argc,
     /* set error-handling */
     /*MPI_CHECK(MPI_Errhandler_set(MPI_COMM_WORLD, MPI_ERRORS_RETURN),
       "cannot set errhandler");*/
-    printf("333333333 \n");
     
     /* setup tests before verifying test validity */
     tests = SetupTests(argc, argv);
@@ -141,20 +140,16 @@ main(int     argc,
       DisplayUsage(argv);
     }
     
-    printf("4444444 \n");
     /* perform each test */
     while (tests != NULL) {
       verbose = tests->testParameters.verbose;
       if (rank == 0 && verbose >= VERBOSE_0) {
           ShowInfo(argc, argv, &tests->testParameters);
       }
-      printf("55555555 \n");
       if (rank == 0 && verbose >= VERBOSE_3) {
         ShowTest(&tests->testParameters);
       }
-      printf("666666666 \n");
       TestIoSys(&tests->testParameters);
-      printf("777777777 \n");
       tests = tests->nextTest;
     }
 
@@ -1862,7 +1857,6 @@ TestIoSys(IOR_param_t *test)
     int            range[3];
     IOR_offset_t   dataMoved;             /* for data rate calculation */
 
-    printf("888888 \n");
     /* set up communicator for test */
     if (test->numTasks > numTasksWorld) {
         if (rank == 0) {
@@ -1873,7 +1867,6 @@ TestIoSys(IOR_param_t *test)
         }
         test->numTasks = numTasksWorld;
     }
-    printf("99999 \n");
     MPI_CHECK(MPI_Comm_group(MPI_COMM_WORLD, &orig_group),
               "MPI_Comm_group() error");
     range[0] = 0; /* first rank */
@@ -1883,7 +1876,6 @@ TestIoSys(IOR_param_t *test)
               "MPI_Group_range_incl() error");
     MPI_CHECK(MPI_Comm_create(MPI_COMM_WORLD, new_group, &testComm),
               "MPI_Comm_create() error");
-    printf("10 10 10 10 10 10 10         \n");
     test->testComm = testComm;
     if (testComm == MPI_COMM_NULL) {
         /* tasks not in the group do not participate in this test */
@@ -1929,11 +1921,9 @@ TestIoSys(IOR_param_t *test)
         (IOR_offset_t *)malloc(test->repetitions * sizeof(IOR_offset_t));
     if (test->aggFileSizeForBW == NULL) ERR("out of memory");
 
-    printf("11 11 11 11 11 11 11        \n");
     /* bind I/O calls to specific API */
     AioriBind(test->api);
 
-    printf("11 11 11 11 11 11 11        \n");
     /* bind I/O calls to specific API */
     /* file size is first calculated on for comparison */
     for (rep = 0; rep < test->repetitions; rep++) {
@@ -1941,7 +1931,6 @@ TestIoSys(IOR_param_t *test)
                                          test->numTasks;
     }
 
-    printf("11 11 11 11 11 11 11        \n");
     /* bind I/O calls to specific API */
     /* show test setup */
     if (rank == 0 && verbose >= VERBOSE_0) ShowSetup(test);
@@ -1955,11 +1944,9 @@ TestIoSys(IOR_param_t *test)
     }
 #endif /* USE_UNDOC_OPT - fillTheFileSystem */
 
-    printf("12  12 12 12 12 12 12 12        \n");
     /* loop over test iterations */
     for (rep = 0; rep < test->repetitions; rep++) {
 
-        printf("13  13 13 13 13 13 13       \n");
         /* Get iteration start time in seconds in task 0 and broadcast to
            all tasks */
         if (rank == 0) {
@@ -1980,10 +1967,8 @@ TestIoSys(IOR_param_t *test)
                     test->timeStampSignatureValue);
             }
         }
-        printf("14  14 14 14 14 14 14 14        \n");
         MPI_CHECK(MPI_Bcast(&test->timeStampSignatureValue, 1, MPI_UNSIGNED, 0,
                   testComm), "cannot broadcast start time value");
-        printf("15 15 15 15 15 15 15\n");
 #if USE_UNDOC_OPT /* fillTheFileSystem */
         if (test->fillTheFileSystem &&
             rep > 0 && rep % (test->fillTheFileSystem / test->numTasks) == 0) {
@@ -2265,7 +2250,6 @@ TestIoSys(IOR_param_t *test)
         MPI_CHECK(MPI_Barrier(testComm), "barrier error");
         rankOffset = 0;
     }
-    printf("12  12 12 12 12 12 12 12        \n");
 
 #if USE_UNDOC_OPT /* fillTheFileSystem */
     if (rank == 0 && test->fillTheFileSystem && verbose >= VERBOSE_0) {
@@ -2273,7 +2257,6 @@ TestIoSys(IOR_param_t *test)
     }
 #endif /* USE_UNDOC_OPT - fillTheFileSystem */
 
-    printf("12  12 12 12 12 12 12 12        \n");
     /* bind I/O calls to specific API */
     SummarizeResults(test);
 
