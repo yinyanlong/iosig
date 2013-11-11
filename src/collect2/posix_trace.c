@@ -214,8 +214,6 @@ off64_t IOSIG_posix_bk_lseek (int fildes, off64_t new_offset) {
 int __wrap_open64(const char *path, int oflag, ... ) {
     int ret_val;
     struct timeval start, end;
-    printf("-------------------wrap_open64-------called by %d\n", getpid());
-    printf("path: %s\n", path);
     
 #if 0
     /*********************** backtrace *********************/
@@ -252,15 +250,12 @@ int __wrap_open64(const char *path, int oflag, ... ) {
         ret_val = __real_open64(path, oflag);
         gettimeofday(&end, NULL);
     }
-    printf("------------> ret_val: %d\n", ret_val);
  
     if (ret_val == -1) { /* Upon error.  */
         return ret_val;
     } 
     pthread_mutex_lock(&bk_files_list_mutex);
-    printf("---------> before bk\n");
     iosig_posix_file * iosig_f = IOSIG_posix_bk_open(ret_val); 
-    printf("---------> after bk\n");
     iosig_f->fh = ret_val;
     iosig_f->oflag = oflag;
     iosig_f->offset = 0;
@@ -362,8 +357,6 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
 
 
 FILE* __wrap_fopen64 (const char *path, const char *mode) {
-    printf("-------------------wrap_fopen64-------called by %d\n", getpid());
-    printf("path: %s\n", path);
     FILE * ret_val;
     struct timeval start, end;
 
@@ -375,8 +368,6 @@ FILE* __wrap_fopen64 (const char *path, const char *mode) {
     return ret_val;
 }
 FILE* __wrap_fopen (const char *path, const char *mode) {
-    printf("-------------------wrap_fopen-------called by %d\n", getpid());
-    printf("path: %s\n", path);
     return __wrap_fopen64(path, mode);
 }
 
