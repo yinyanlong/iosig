@@ -1,13 +1,11 @@
-IOSIG_LIB_PATH = ../../collect
-CFLAGS    += -finstrument-functions
-LDFLAGS   += -L${IOSIG_LIB_PATH} -liosig
+#!/bin/bash
 
 main: main.o 
-	gcc main.o -o main ${LDFLAGS}
+	gcc main.o -o main
 
 
 main.o: main.c
-	gcc ${CFLAGS} -g -c -o main.o main.c
+	gcc -c -o main.o main.c
 
 clean:
 	rm *.o main
