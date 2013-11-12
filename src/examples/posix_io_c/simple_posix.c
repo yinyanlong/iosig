@@ -7,21 +7,17 @@
 int stream_io(void) {
     fpos_t fpos;
     int i;
-    char buffer[5] = {'b'};  /* initialized to zeroes */
-    printf("-----------------------1-------------------\n");
+    char buffer[5] = {'b'};  
     FILE *fp = fopen("./myfile", "w+");
-    printf("-----------------------2-------------------\n");
 
     if (fp == NULL) {
         perror("Failed to open file \"myfile\"");
         return EXIT_FAILURE;
     }
 
-    printf("-----------------------3-------------------\n");
     for (i = 0; i < 5; i++) {
         fwrite(buffer, 1, 5, fp);
     }
-    printf("-----------------------4-------------------\n");
                          
     fprintf(fp, "bbbbb");
     fclose(fp);
@@ -40,59 +36,33 @@ int posix_io(void) {
 
     /* open */
     for (i = 0; i < 5; i++) {
-        sprintf(filename, "./hehe_%d", i);
-        file_handlers[i] = open(filename, O_RDWR | O_APPEND | O_CREAT, mode);
+        sprintf(filename, "./datafile_%d", i);
+        file_handlers[i] = open(filename, O_RDWR | O_CREAT, mode);
     }
 
     /* write */
     int offset;
-    for (i = 0; i < 5; i++) {
-        offset = lseek(file_handlers[i], 200, SEEK_SET);
-        printf("xxxxxxxxxxxxx      new offset: %d\n", offset);
-    }
 
     for (i = 0; i < 5; i++) {
-        for (j = 0; j<5; j++) {
+        for (j = 0; j < 5; j++) {
             write(file_handlers[i], buffer, 5);
         }
     }
     
-    /*
-    for (i = 4; i >=0; i--) {
-        close(file_handlers[i]);
+    for (i = 0; i < 5; i++) {
+        offset = lseek(file_handlers[i], -25, SEEK_CUR);
     }
 
+    /* read */
     for (i = 0; i < 5; i++) {
-        sprintf(filename, "./hehe_%d", i);
-        file_handlers[i] = open(filename, O_RDWR | O_CREAT | O_APPEND, mode);
-    }
-    */
-
-    /*
-    int offset;
-    for (i = 0; i < 5; i++) {
-        offset = lseek(file_handlers[i], -500, SEEK_CUR);
-        printf("new offset: %d\n", offset);
-    }
-    */
-    for (i = 0; i < 5; i++) {
-        offset = lseek(file_handlers[i], 0, SEEK_CUR);
-        printf("+++++++++++++++++current offset: %d\n", offset);
-    }
-    for (i = 0; i < 5; i++) {
-        offset = lseek(file_handlers[i], -200, SEEK_CUR);
-        printf("+++++++++++++++++new offset: %d\n", offset);
-    }
-
-    for (i = 0; i < 5; i++) {
-        for (j = 0; j<5; j++) {
+        for (j = 0; j < 5; j++) {
             read(file_handlers[i], read_buffer, 5);
         }
     }
     
 
     /* close */
-    for (i = 4; i >=0; i--) {
+    for (i = 4; i >= 0; i--) {
         close(file_handlers[i]);
     }
     
@@ -101,7 +71,7 @@ int posix_io(void) {
 
 int main(void) {
     stream_io();
-    //posix_io();
+    posix_io();
     return 0;
 }
 

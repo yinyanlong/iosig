@@ -1,9 +1,10 @@
 #!/bin/bash
 
+rm -f *out*
+
 # build the executable
 make clean
-make
-#rm -f hehe_*
+make -f Makefile.iosig
 
 # run the executable, this step also generates the 
 # execution tracing file, named exe_pid.out

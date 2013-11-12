@@ -94,7 +94,7 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
         tmp->fh = fildes;
         tmp->next = NULL;
 
-        IOSIG_bk_list_dump(fildes);
+        //IOSIG_bk_list_dump(fildes);
         
         return tmp;
     }
@@ -106,7 +106,7 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
  */
 int IOSIG_posix_bk_close (int fildes) {
     iosig_posix_file * tmp = bk_files_list;
-    IOSIG_bk_list_dump(fildes);
+    //IOSIG_bk_list_dump(fildes);
 
     if (bk_files_list == NULL) {
         return -1;
