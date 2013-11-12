@@ -26,7 +26,7 @@ int MPI_File_open(MPI_Comm comm, char *filename, int amode,
     gettimeofday(&end, NULL);
     iorec->op_end_time = end;
 
-    IOSIG_mpiio_write_log(iorec);
+    IOSIG_mpiio_write_log_with_path(iorec, filename);
     //PushIO_RTB_log(thisrank, iorec);
 
     return ret_val;

@@ -38,14 +38,13 @@ void end_log()
 }
 
 /* write log information into a file  */
-void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
-{
+void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec) {
     struct timeval diffstart, diffend;
     char operation[20];
 
     if (!out_fp) {
         fprintf(stderr,
-                "Pointer to log file doesn't exist in log_read_trace. Opening now. \n");
+                "Pointer to log file doesn't exist. Opening now. \n");
 
         int rank;
         /* find MPI_rank information  */
@@ -63,7 +62,7 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
 
     get_operation(operation, pushio_rec->operation);
-    sprintf(mpiio_logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n",
+    sprintf(mpiio_logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld -\n",
             operation, pushio_rec->filedes, 
             pushio_rec->file_pos, pushio_rec->data_size,
             (long) diffstart.tv_sec, (long) diffstart.tv_usec,
@@ -72,6 +71,41 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec)
 
     return;
 }
+void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec, const char * path)
+{
+    struct timeval diffstart, diffend;
+    char operation[20];
+
+    if (!out_fp) {
+        fprintf(stderr,
+                "Pointer to log file doesn't exist. Opening now. \n");
+
+        int rank;
+        /* find MPI_rank information  */
+        if (!pushio_rec->is_mpi_operation) {
+            rank = -1;
+        } else {
+            rank = pushio_rec->mpi_rank;
+        }
+        /* TODO: consider removing the following 3 lines */
+        char filename_rank[30];
+        sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
+        out_fp = fopen(filename_rank, "a");
+    }
+    timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
+    timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
+
+    get_operation(operation, pushio_rec->operation);
+    sprintf(mpiio_logtext, "%-15s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld %s\n",
+            operation, pushio_rec->filedes, 
+            pushio_rec->file_pos, pushio_rec->data_size,
+            (long) diffstart.tv_sec, (long) diffstart.tv_usec,
+            (long) diffend.tv_sec, (long) diffend.tv_usec, path);
+    __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
+
+    return;
+}
+
 
 void IOSIG_backtrace() {
 #define BACK_TRACE_SIZE 512

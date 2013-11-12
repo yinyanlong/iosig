@@ -81,9 +81,11 @@ int __real_fseek (FILE *stream, long offset, int whence);
 
 void init_log(int rank);
 void end_log();
-void log_read_trace(iosig_mpiio_trace_record * pushio_rec);
+void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec);
+void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec, 
+        const char *path);
 int timeval_diff(struct timeval *result, struct timeval *x,
-		 struct timeval *y);
+        struct timeval *y);
 void get_operation(char *operation, int rec_operation);
 void get_trace_file_path_pid(char *path, int trace_type);
 void get_trace_file_path_rank(char *path, int trace_type);

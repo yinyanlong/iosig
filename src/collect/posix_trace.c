@@ -44,7 +44,7 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
                 (long) diffend.tv_sec, (long) diffend.tv_usec, path);
         __real_fwrite(posix_logtext, strlen(posix_logtext), 1, posix_fp);
     } else {
-        sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld\n", 
+        sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld -\n", 
                 operation, fildes, position, size,
                 (long) diffstart.tv_sec, (long) diffstart.tv_usec, 
                 (long)diffend.tv_sec, (long) diffend.tv_usec);
