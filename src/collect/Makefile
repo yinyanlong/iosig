@@ -44,7 +44,7 @@ MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpi/romio/mpi-io               
 
 IOSIG_WRAP_FLAGS = -Wl,-wrap,fopen,-wrap,fopen64,-wrap,fclose,-wrap,fread,-wrap,fwrite,-wrap,fseek,-wrap,open,-wrap,close,-wrap,read,-wrap,write,-wrap,lseek,-wrap,lseek64,-wrap,open64
 
-FCFLAGS	:=
+FCFLAGS	:= -DFORTRANDOUBLEUNDERSCORE
 
 # put target objects to different groups so each group can have
 # special compiler options

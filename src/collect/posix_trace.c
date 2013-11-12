@@ -16,7 +16,7 @@ typedef struct iosig_posix_file_t {
                        to `size of the file'. It's set to `1' when lseek
                        gets called, and reset to `0' when `write' is 
                        called */
-    //int user_account; /* how many users opened this file */
+    /*int user_account;*/ /* how many users opened this file */
     int oflag;
     off64_t offset;
     struct iosig_posix_file_t * next; /* we use link list for now */
@@ -71,7 +71,7 @@ void IOSIG_bk_list_dump (int fildes) {
             printf("fildes[%d] = %d, %d\n", i, tmp->fh, (tmp->fh==fildes)?1:0);
             tmp = tmp->next;
             ++i;
-        } while (tmp);
+        } while ( (tmp!=NULL) );
     }
     printf("End of list dumping.\n");
 }
@@ -85,16 +85,17 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
         bk_files_list->next = NULL;
         return bk_files_list;
     } else {
+        iosig_posix_file * tmp = bk_files_list;
+        while (tmp->next != NULL && tmp->next->fh != fildes) {
+            tmp = tmp->next;
+        }
+        tmp->next = malloc(sizeof(iosig_posix_file));
+        tmp = tmp->next;
+        tmp->fh = fildes;
+        tmp->next = NULL;
+
         IOSIG_bk_list_dump(fildes);
         
-        iosig_posix_file * tmp;
-        tmp = bk_files_list;
-        do {
-            tmp = tmp->next;
-        } while (tmp);
-        tmp = malloc(sizeof(iosig_posix_file));
-        tmp->next=NULL;
-
         return tmp;
     }
 }
@@ -105,6 +106,7 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
  */
 int IOSIG_posix_bk_close (int fildes) {
     iosig_posix_file * tmp = bk_files_list;
+    IOSIG_bk_list_dump(fildes);
 
     if (bk_files_list == NULL) {
         return -1;
@@ -289,7 +291,7 @@ ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
     gettimeofday(&end, NULL);
     if (ret_val >= 0) {         /* ret_val is actual read bytes */
         off64_t offset = IOSIG_posix_bk_read (fildes, ret_val);
-        if (offset > 0) {
+        if (offset >= 0) {
             IOSIG_posix_write_log ("READ", fildes, offset, ret_val, &start, &end, NULL);
         }
     }

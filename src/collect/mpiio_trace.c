@@ -10,9 +10,7 @@ int MPI_File_open(MPI_Comm comm, char *filename, int amode,
     struct timeval start, end;
     gettimeofday(&start, NULL);
 
-    printf("Before PMPI_File_open\n");
     ret_val = PMPI_File_open(comm, filename, amode, info, fh);
-    printf("After PMPI_File_open\n");
 
     iorec->is_mpi_operation = 1;
     iorec->mpi_rank = thisrank;
