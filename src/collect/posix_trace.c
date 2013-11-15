@@ -23,6 +23,7 @@ typedef struct iosig_posix_file_t {
 } iosig_posix_file;
 
 pthread_mutex_t bk_files_list_mutex = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t posix_fp_mutex = PTHREAD_MUTEX_INITIALIZER;
 static iosig_posix_file * bk_files_list;  /* head pointer of the book keeping 
                                              link list */
 
@@ -37,6 +38,7 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
     timeval_diff(&diffend, end, &bigbang);
     /* Format: OPEN, file_path, position, size, time1, time2 */
 
+    pthread_mutex_lock(&posix_fp_mutex);
     if (path) {
         sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld %s\n", 
                 operation, fildes, position, size,
@@ -50,11 +52,30 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
                 (long)diffend.tv_sec, (long) diffend.tv_usec);
         __real_fwrite(posix_logtext, strlen(posix_logtext), 1, posix_fp);
     }
+    pthread_mutex_unlock(&posix_fp_mutex);
 }
 
 /*
  * Book keeping for posix file operations.
  */
+
+/*
+ * Reture the book keeping entry of the given `fildes'.
+ */
+iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
+    if (bk_files_list == NULL) {
+        return NULL;
+    } 
+    iosig_posix_file * tmp = bk_files_list;
+    while (tmp!=NULL && tmp->fh != fildes) {
+        tmp = tmp->next;
+    }
+    if (tmp == NULL) {
+        return NULL;
+    } else {
+        return tmp;
+    }
+}
 
 /*
  * Print the whole book keeping list
@@ -85,6 +106,11 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
         bk_files_list->next = NULL;
         return bk_files_list;
     } else {
+        iosig_posix_file * existed = IOSIG_posix_get_file_by_fd( fildes );
+        if (existed) {
+            printf("Double opened.\n");
+        }
+
         iosig_posix_file * tmp = bk_files_list;
         while (tmp->next != NULL && tmp->next->fh != fildes) {
             tmp = tmp->next;
@@ -134,24 +160,6 @@ int IOSIG_posix_bk_close (int fildes) {
 }
 
 /*
- * Reture the book keeping entry of the given `fildes'.
- */
-iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
-    if (bk_files_list == NULL) {
-        return NULL;
-    } 
-    iosig_posix_file * tmp = bk_files_list;
-    while (tmp!=NULL && tmp->fh != fildes) {
-        tmp = tmp->next;
-    }
-    if (tmp == NULL) {
-        return NULL;
-    } else {
-        return tmp;
-    }
-}
-
-/*
  * Update the book keeping entry of the given `fildes'.
  * The second parameter is the read/write size of this I/O operation.
  * The return value is the beginning offset of this operation.
@@ -167,7 +175,6 @@ off64_t IOSIG_posix_bk_read (int fildes, size_t nbyte) {
 #if IOSIG_ASSERT_TEST
     off64_t new_offset = __real_lseek64(fildes, 0, SEEK_CUR);
     assert (new_offset == tmp->offset);
-#endif
 
     return ret_val;
 }
@@ -192,7 +199,6 @@ off64_t IOSIG_posix_bk_write (int fildes, size_t nbyte) {
 #if IOSIG_ASSERT_TEST
     off64_t new_offset = __real_lseek64(fildes, 0, SEEK_CUR);
     assert (new_offset == tmp->offset);
-#endif
 
     return ret_val;
 }
