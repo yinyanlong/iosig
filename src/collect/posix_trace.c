@@ -175,6 +175,7 @@ off64_t IOSIG_posix_bk_read (int fildes, size_t nbyte) {
 #if IOSIG_ASSERT_TEST
     off64_t new_offset = __real_lseek64(fildes, 0, SEEK_CUR);
     assert (new_offset == tmp->offset);
+#endif
 
     return ret_val;
 }
@@ -199,6 +200,7 @@ off64_t IOSIG_posix_bk_write (int fildes, size_t nbyte) {
 #if IOSIG_ASSERT_TEST
     off64_t new_offset = __real_lseek64(fildes, 0, SEEK_CUR);
     assert (new_offset == tmp->offset);
+#endif
 
     return ret_val;
 }
