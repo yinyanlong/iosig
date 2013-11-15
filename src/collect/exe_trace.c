@@ -41,9 +41,10 @@ void __attribute__ ((destructor)) trace_end (void) {
         __real_fclose(posix_fp);
     }
 
+    int pid = getpid();
+    printf("PID %d Rank %d\n", pid, my_rank);
     /* if MPI are used, rename the pid based files to rank based */
     if(my_rank != -1) {
-        int pid = getpid();
         char old_file_path[FILE_PATH_LENGTH];
         char new_file_path[FILE_PATH_LENGTH];
         /* Rename EXE traces */
@@ -65,6 +66,7 @@ void __attribute__ ((destructor)) trace_end (void) {
 }
 
 void __cyg_profile_func_enter (void *func, void *caller) {
+#ifdef EXE_TRACE
     char exe_logtext[80];
     if(exe_fp != NULL) {
         struct timeval current, difftime;
@@ -73,9 +75,11 @@ void __cyg_profile_func_enter (void *func, void *caller) {
         sprintf(exe_logtext, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
+#endif
 }
 
 void __cyg_profile_func_exit (void *func, void *caller) {
+#ifdef EXE_TRACE
     char exe_logtext[80];
     if (exe_fp != NULL) {
         struct timeval current, difftime;
@@ -85,5 +89,6 @@ void __cyg_profile_func_exit (void *func, void *caller) {
         sprintf(exe_logtext, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
+#endif
 }
 
