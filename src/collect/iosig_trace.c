@@ -32,7 +32,7 @@ void end_log()
     if (out_fp) {
         sprintf(mpiio_logtext, "#---------- END OF TRACE --------------\n");
         __real_fwrite(mpiio_logtext, strlen(mpiio_logtext), 1, out_fp);
-        fclose(out_fp);
+        __real_fclose(out_fp);
     }
     return;
 }
@@ -56,7 +56,7 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec) {
         /* TODO: consider removing the following 3 lines */
         char filename_rank[30];
         sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
-        out_fp = fopen(filename_rank, "a");
+        out_fp = __real_fopen(filename_rank, "a");
     }
     timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
@@ -90,7 +90,7 @@ void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec, cons
         /* TODO: consider removing the following 3 lines */
         char filename_rank[30];
         sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
-        out_fp = fopen(filename_rank, "a");
+        out_fp = __real_fopen(filename_rank, "a");
     }
     timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
@@ -227,7 +227,7 @@ int PushIO_RTB_init(int rank)
 
     sprintf(filename_rank, "trace_r%d.out", rank);
 
-    fp_rank = fopen(filename_rank, "a");
+    fp_rank = __real_fopen(filename_rank, "a");
     if (!fp_rank) {
         fprintf(stderr,
                 "Pointer to log file doesn't exist in init_log \n");
@@ -254,7 +254,7 @@ int PushIO_RTB_finalize(int rank)
         iortb_tail = NULL;
     }
     if (fp_rank) {
-        fclose(fp_rank);
+        __real_fclose(fp_rank);
     }
     return 1;
 }
@@ -322,7 +322,7 @@ int PushIO_RTB_dump_trace(int rank)
 
     sprintf(filename_rank, "trace_%d.out", rank);
 
-    fp_rank = fopen(filename_rank, "w");
+    fp_rank = __real_fopen(filename_rank, "w");
     if (!fp_rank) {
         fprintf(stderr,
                 "Pointer to log file doesn't exist in init_log \n");
@@ -352,7 +352,7 @@ int PushIO_RTB_dump_trace(int rank)
     } while (rtb_node != NULL);
 
     free(rtb_node);
-    fclose(fp_rank);
+    __real_fclose(fp_rank);
     return;
 }
 
@@ -497,14 +497,14 @@ void getProcCmdLine (int *ac, char **av)
 
     pid = getpid ();
     snprintf (file, 256, "/proc/%d/cmdline", pid);
-    infile = fopen (file, "r");
+    infile = __real_fopen (file, "r");
 
     if (infile != NULL)
     {
         while (!feof (infile))
         {
             inbuf = malloc (IOSIG_MAX_ARG_STRING_SIZE);
-            if (fread (inbuf, 1, IOSIG_MAX_ARG_STRING_SIZE, infile) > 0)
+            if (__real_fread (inbuf, 1, IOSIG_MAX_ARG_STRING_SIZE, infile) > 0)
             {
                 arg_ptr = inbuf;
                 while (*arg_ptr != '\0')
@@ -518,7 +518,7 @@ void getProcCmdLine (int *ac, char **av)
         }
         *ac = i;
 
-        fclose (infile);
+        __real_fclose (infile);
     }
 }
 
@@ -536,7 +536,7 @@ void getProcCmdLine2 (int *ac, char **av)
 
     pid = getpid ();
     snprintf (file, 256, "/proc/%d/cmdline", pid);
-    infile = fopen (file, "r");
+    infile = __real_fopen (file, "r");
 
     if (infile != NULL)
     {
@@ -547,7 +547,7 @@ void getProcCmdLine2 (int *ac, char **av)
             av[0] = malloc (IOSIG_MAX_ARG_STRING_SIZE);
             memset(av[0], 0, IOSIG_MAX_ARG_STRING_SIZE);
             //av[0] = inbuf;
-            length = fread (av[0], 1, IOSIG_MAX_ARG_STRING_SIZE, infile);
+            length = __real_fread (av[0], 1, IOSIG_MAX_ARG_STRING_SIZE, infile);
 
             if ( length > 0)
             {
@@ -567,7 +567,7 @@ void getProcCmdLine2 (int *ac, char **av)
         }
         *ac = i;
 
-        fclose (infile);
+        __real_fclose (infile);
     }
 }
 

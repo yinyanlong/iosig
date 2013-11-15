@@ -17,7 +17,6 @@ void __attribute__ ((constructor)) trace_begin (void) {
 
     /* initialize execution trace file */
     get_trace_file_path_pid(trace_file_path, TRACE_TYPE_EXE);
-    //exe_fp = fopen(trace_file_path, "a");
     exe_fp = __real_fopen64((char*)trace_file_path, (char*)"a");
 
     /* initialize POSIX I/O trace file */
