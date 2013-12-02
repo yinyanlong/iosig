@@ -45,7 +45,7 @@ void mpi_init_ (int *ierr)
 int MPI_Finalize(void)
 {
     int ret_val;
-    PushIO_RTB_finalize(thisrank);
+    //PushIO_RTB_finalize(thisrank);
     end_log();
     free(iorec);
 

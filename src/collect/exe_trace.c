@@ -3,8 +3,11 @@
 #include <string.h>
 #include "iosig_trace.h"
 
+#define EXE_TRACE_DEPTH 2
+
 struct timeval bigbang = (struct timeval){0};
 int my_rank = -1;
+int current_depth = 0;
 
 /*
  * Initial the log file for exe_prof.
@@ -28,6 +31,7 @@ void __attribute__ ((constructor)) trace_begin (void) {
     __real_fwrite(exe_logtext, strlen(exe_logtext), 1, posix_fp);
     
     gettimeofday(&bigbang, NULL);
+    current_depth = 0;
 }
 
 void __attribute__ ((destructor)) trace_end (void) {
@@ -60,7 +64,12 @@ void __attribute__ ((destructor)) trace_end (void) {
 }
 
 void __cyg_profile_func_enter (void *func, void *caller) {
-#ifdef EXE_TRACE
+//#ifdef EXE_TRACE
+    ++current_depth;
+    if (current_depth > EXE_TRACE_DEPTH) {
+        return;
+    }
+
     char exe_logtext[80];
     if(exe_fp != NULL) {
         struct timeval current, difftime;
@@ -69,11 +78,20 @@ void __cyg_profile_func_enter (void *func, void *caller) {
         sprintf(exe_logtext, "e %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
-#endif
+//#endif
 }
 
 void __cyg_profile_func_exit (void *func, void *caller) {
-#ifdef EXE_TRACE
+//#ifdef EXE_TRACE
+    /* TODO: when exit(0) is called, the program exits immediately,
+     * this tracing function will not be called
+     */
+    if (current_depth > EXE_TRACE_DEPTH) {
+        --current_depth;
+        return;
+    }
+    --current_depth;
+
     char exe_logtext[80];
     if (exe_fp != NULL) {
         struct timeval current, difftime;
@@ -83,6 +101,6 @@ void __cyg_profile_func_exit (void *func, void *caller) {
         sprintf(exe_logtext, "x %p %p %6ld.%06ld\n", func, caller, (long) difftime.tv_sec, (long) difftime.tv_usec );
         __real_fwrite(exe_logtext, strlen(exe_logtext), 1, exe_fp);
     }
-#endif
+//#endif
 }
 
