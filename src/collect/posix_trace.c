@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <unistd.h>
 #include <stdarg.h>
 #include <sys/stat.h>
 #include <string.h>
@@ -7,7 +8,7 @@
 
 #include "iosig_trace.h"
 
-#define IOSIG_ASSERT_TEST 1
+#define IOSIG_ASSERT_TEST 0
 
 typedef struct iosig_posix_file_t {
     int fh;         /* file handler */
@@ -33,12 +34,13 @@ static iosig_posix_file * bk_files_list;  /* head pointer of the book keeping
 void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position, 
         size_t size, struct timeval * start, struct timeval * end, 
         const char * path) {
+    //return;
     struct timeval diffstart, diffend;
     timeval_diff(&diffstart, start, &bigbang);
     timeval_diff(&diffend, end, &bigbang);
     /* Format: OPEN, file_path, position, size, time1, time2 */
 
-    pthread_mutex_lock(&posix_fp_mutex);
+    //pthread_mutex_lock(&posix_fp_mutex);
     if (path) {
         sprintf(posix_logtext, "%-10s %3d %6ld %6ld %4ld.%06ld %4ld.%06ld %s\n", 
                 operation, fildes, position, size,
@@ -52,7 +54,7 @@ void IOSIG_posix_write_log (const char * operation, int fildes, off64_t position
                 (long)diffend.tv_sec, (long) diffend.tv_usec);
         __real_fwrite(posix_logtext, strlen(posix_logtext), 1, posix_fp);
     }
-    pthread_mutex_unlock(&posix_fp_mutex);
+    //pthread_mutex_unlock(&posix_fp_mutex);
 }
 
 /*
@@ -73,7 +75,11 @@ iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
     if (tmp == NULL) {
         return NULL;
     } else {
-        return tmp;
+        if (tmp->fh == fildes) {
+            return tmp;
+        }else {
+            return NULL;
+        }
     }
 }
 
@@ -82,7 +88,6 @@ iosig_posix_file * IOSIG_posix_get_file_by_fd (int fildes) {
  */
 void IOSIG_bk_list_dump (int fildes) {
     if (bk_files_list == NULL) {
-        printf("List is empty!\n");
         return;
     } else {
         iosig_posix_file * tmp;
@@ -90,11 +95,12 @@ void IOSIG_bk_list_dump (int fildes) {
         tmp = bk_files_list;
         do {
             printf("fildes[%d] = %d, %d\n", i, tmp->fh, (tmp->fh==fildes)?1:0);
+            // TODO: printf may cause user application's error.
+            // For example, Montage's libsvc will fail.
             tmp = tmp->next;
             ++i;
         } while ( (tmp!=NULL) );
     }
-    printf("End of list dumping.\n");
 }
 
 /* 
@@ -108,7 +114,7 @@ iosig_posix_file * IOSIG_posix_bk_open (int fildes) {
     } else {
         iosig_posix_file * existed = IOSIG_posix_get_file_by_fd( fildes );
         if (existed) {
-            printf("Double opened.\n");
+            //printf("Double opened.\n");
         }
 
         iosig_posix_file * tmp = bk_files_list;
@@ -239,7 +245,7 @@ int __wrap_open64(const char *path, int oflag, ... ) {
         ret_val = __real_open64(path, oflag);
         gettimeofday(&end, NULL);
     }
- 
+#if 1
     if (ret_val == -1) { /* Upon error.  */
         return ret_val;
     } 
@@ -261,6 +267,9 @@ int __wrap_open64(const char *path, int oflag, ... ) {
     IOSIG_posix_write_log ("OPEN", iosig_f->fh, 0, 0, &start, &end, path);
     pthread_mutex_unlock(&bk_files_list_mutex);
     return ret_val;
+#else
+    return ret_val;
+#endif 
 }
 int __wrap_open(const char *path, int oflag, ... ) {
     if (oflag & O_CREAT) {
@@ -274,39 +283,62 @@ int __wrap_open(const char *path, int oflag, ... ) {
         return __wrap_open64(path, oflag);
     }
 }
-#define __wrap_open __wrap_open64
+//#define __wrap_open __wrap_open64
 
 int __wrap_close(int fildes) {
+#if 1
     int ret_val;
     struct timeval start, end;
 
     gettimeofday(&start, NULL);
     ret_val = __real_close(fildes);
     gettimeofday(&end, NULL);
+    pthread_mutex_lock(&bk_files_list_mutex);
+    if (!IOSIG_posix_get_file_by_fd(fildes)) {
+        pthread_mutex_unlock(&bk_files_list_mutex);
+        return ret_val;
+    }
     int closed = IOSIG_posix_bk_close (fildes);
     if (closed == 1) {
         IOSIG_posix_write_log ("CLOSE", fildes, 0, 0, &start, &end, NULL);
     }
+    pthread_mutex_unlock(&bk_files_list_mutex);
     return ret_val;
+#else
+    return __real_close(fildes);
+#endif
 }
 
 ssize_t __wrap_read(int fildes, void *buf, size_t nbyte) {
+#if 1
     ssize_t ret_val;
     struct timeval start, end;
 
     gettimeofday(&start, NULL);
     ret_val = __real_read(fildes, buf, nbyte);
     gettimeofday(&end, NULL);
+    pthread_mutex_lock(&bk_files_list_mutex);
+    if (!IOSIG_posix_get_file_by_fd(fildes)) {
+        pthread_mutex_unlock(&bk_files_list_mutex);
+        return ret_val;
+    }
+    pthread_mutex_unlock(&bk_files_list_mutex);
     if (ret_val >= 0) {         /* ret_val is actual read bytes */
+        pthread_mutex_lock(&bk_files_list_mutex);
         off64_t offset = IOSIG_posix_bk_read (fildes, ret_val);
         if (offset >= 0) {
             IOSIG_posix_write_log ("READ", fildes, offset, ret_val, &start, &end, NULL);
         }
+        pthread_mutex_unlock(&bk_files_list_mutex);
     }
     return ret_val;
+#else
+    return __real_read(fildes, buf, nbyte);
+#endif
 }
 
 ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
+#if 1
     ssize_t ret_val;
     struct timeval start, end;
 
@@ -314,17 +346,29 @@ ssize_t __wrap_write(int fildes, const void *buf, size_t nbyte) {
     ret_val = __real_write(fildes, buf, nbyte);
     gettimeofday(&end, NULL);
 
+    pthread_mutex_lock(&bk_files_list_mutex);
+    if (!IOSIG_posix_get_file_by_fd(fildes)) {
+        pthread_mutex_unlock(&bk_files_list_mutex);
+        return ret_val;
+    }
+    pthread_mutex_unlock(&bk_files_list_mutex);
     if (ret_val >= 0) {         /* ret_val is actual write bytes */
+        pthread_mutex_lock(&bk_files_list_mutex);
         off64_t offset = IOSIG_posix_bk_write (fildes, ret_val);
         if (offset > 0) {
             IOSIG_posix_write_log ("WRITE", fildes, offset, ret_val, &start, &end, NULL);
         }
+        pthread_mutex_unlock(&bk_files_list_mutex);
     }
 
     return ret_val;
+#else
+    return __real_write(fildes, buf, nbyte);
+#endif
 }
 
 off64_t __wrap_lseek64(int fildes, off64_t offset, int whence) {
+#if 1
     off64_t new_offset; /* the new offset */
     struct timeval start, end;
 
@@ -333,12 +377,17 @@ off64_t __wrap_lseek64(int fildes, off64_t offset, int whence) {
     gettimeofday(&end, NULL);
 
     if (offset != 0 && new_offset != -1) {
+        pthread_mutex_lock(&bk_files_list_mutex);
         off64_t old_offset = IOSIG_posix_bk_lseek (fildes, new_offset);
-        if (old_offset > 0) {
+        if (old_offset >= 0) {
             IOSIG_posix_write_log ("LSEEK", fildes, old_offset, new_offset, &start, &end, NULL);
         }
+        pthread_mutex_unlock(&bk_files_list_mutex);
     }
     return new_offset;
+#else
+    return __real_lseek(fildes, offset, whence);
+#endif
 }
 off_t __wrap_lseek(int fildes, off_t offset, int whence) {
     return (off_t) __wrap_lseek64(fildes, (off64_t)offset, whence);
@@ -346,23 +395,37 @@ off_t __wrap_lseek(int fildes, off_t offset, int whence) {
 
 
 FILE* __wrap_fopen64 (const char *path, const char *mode) {
+#if 1
     FILE * ret_val;
     struct timeval start, end;
 
     gettimeofday(&start, NULL);
-    ret_val =  __real_fopen64(path, mode);
+    ret_val = __real_fopen64(path, mode);
     gettimeofday(&end, NULL);
+    
+    if(ret_val==NULL) {
+        return ret_val;
+    }
 
-    IOSIG_posix_write_log ("FOPEN", ret_val->_fileno, 0, 0, &start, &end, path); 
+    pthread_mutex_lock(&posix_fp_mutex);
+    int fildes = ret_val->_fileno; //fileno(ret_val);
+    if ( fildes>2) {
+        IOSIG_posix_write_log ("FOPEN", fildes, 0, 0, &start, &end, path); 
+    }
+    pthread_mutex_unlock(&posix_fp_mutex);
     return ret_val;
+#else
+    return __real_fopen64(path, mode);
+#endif
 }
 FILE* __wrap_fopen (const char *path, const char *mode) {
     return __wrap_fopen64(path, mode);
 }
 
 int __wrap_fclose (FILE* stream) {
+#if 1
     int ret_val;
-    int file_no = stream->_fileno;
+    int file_no = fileno(stream); //stream->_fileno;
     struct timeval start, end;
 
     gettimeofday(&start, NULL);
@@ -371,11 +434,16 @@ int __wrap_fclose (FILE* stream) {
 
     IOSIG_posix_write_log ("FCLOSE", file_no, 0, 0, &start, &end, NULL); 
     return ret_val;
+#else
+    return __real_fclose(stream);
+#endif
 }
 
 size_t __wrap_fread(void * ptr, size_t size, size_t nitems, 
         FILE * stream) {
-    if (stream->_fileno < 3) {
+#if 1
+    int file_no = fileno(stream);
+    if (file_no < 3) {
         /* fileno 0, 1, and 2 represent stdin, stdout, stderr  */
         return __real_fread(ptr, size, nitems, stream);
     }
@@ -389,16 +457,21 @@ size_t __wrap_fread(void * ptr, size_t size, size_t nitems,
     gettimeofday(&end, NULL);
 
     if (ret_val > 0) {
-        IOSIG_posix_write_log ("FREAD", stream->_fileno, 
+        IOSIG_posix_write_log ("FREAD", file_no, 
                 (off64_t) old_offset.__pos, 
                 ret_val, &start, &end, NULL); 
     }
     return ret_val;
+#else
+    return __real_fread(ptr, size, nitems, stream);
+#endif
 }
 
 size_t __wrap_fwrite(const void * ptr, size_t size, size_t nitems, 
         FILE * stream) {
-    if (stream->_fileno < 3) {
+#if 1
+    int file_no = fileno(stream);
+    if (file_no < 3) {
         /* fileno 0, 1, and 2 represent stdin, stdout, stderr  */
         return __real_fwrite(ptr, size, nitems, stream);
     }
@@ -413,14 +486,18 @@ size_t __wrap_fwrite(const void * ptr, size_t size, size_t nitems,
     gettimeofday(&end, NULL);
 
     if (ret_val > 0) { 
-        IOSIG_posix_write_log ("FWRITE", stream->_fileno, 
+        IOSIG_posix_write_log ("FWRITE", file_no, 
                 old_offset.__pos, 
                 ret_val, &start, &end, NULL); 
     }
     return ret_val;
+#else
+    return __real_fwrite(ptr, size, nitems, stream);
+#endif
 }
 
 int __wrap_fseek(FILE *stream, long offset, int whence) {
+#if 1
     struct timeval start, end;
     fpos64_t old_offset;
     fgetpos64(stream, &old_offset); /* TODO: check ret_val of fgetpos  */
@@ -430,10 +507,13 @@ int __wrap_fseek(FILE *stream, long offset, int whence) {
     gettimeofday(&end, NULL);
 
     if (ret_val > 0) {
-        IOSIG_posix_write_log ("FSEEK", stream->_fileno, 
+        IOSIG_posix_write_log ("FSEEK", fileno(stream), 
                 old_offset.__pos, 
                 ret_val, &start, &end, NULL); 
     }
     return ret_val;
+#else
+    return  __real_fseek(stream, offset, whence);
+#endif
 }
 

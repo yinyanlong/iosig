@@ -11,6 +11,7 @@
 #include <sys/time.h>
 #include <assert.h>
 #include <execinfo.h>
+#include <pthread.h>
 
 #define MAX_NUM_PROCS 4
 #define MAX_NUM_RTB_ENTRIES 1024
@@ -23,6 +24,9 @@ extern int my_rank;              /* my_rank is initialized in -1, a value larger
 extern struct timeval bigbang;   /* bigbang means the beginning of everything,
                                     here it means the beginning of this 
                                     application */
+
+extern pthread_mutex_t bk_files_list_mutex;
+extern pthread_mutex_t posix_fp_mutex;
 
 FILE *out_fp; /* file pointer of the MPIIO trace file */
 FILE *exe_fp; /* file pointer of the execution trace file */
@@ -42,10 +46,10 @@ typedef struct iosig_mpiio_trace_record_t {
 } iosig_mpiio_trace_record;
 
 
-char mpiio_logtext[512];    /* Pre define this variable here so the *_write_log()
+char mpiio_logtext[1024];    /* Pre define this variable here so the *_write_log()
                          do not need to create it each time  */
-char posix_logtext[512];
-char exe_logtext[512];
+char posix_logtext[1024];
+char exe_logtext[1024];
 
 iosig_mpiio_trace_record *iorec;   /* TODO: this is not thread safe.  */
 int thisrank;
