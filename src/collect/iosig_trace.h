@@ -24,6 +24,7 @@ extern int my_rank;              /* my_rank is initialized in -1, a value larger
 extern struct timeval bigbang;   /* bigbang means the beginning of everything,
                                     here it means the beginning of this 
                                     application */
+extern int current_depth;
 
 extern pthread_mutex_t bk_files_list_mutex;
 extern pthread_mutex_t posix_fp_mutex;
