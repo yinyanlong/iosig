@@ -32,7 +32,7 @@ void mpi_init_ (int *ierr)
     memset(argv, 0, 32*sizeof(char*));
 
     //get command line arguments from main()
-    getProcCmdLine2(&argc, argv);
+    getProcCmdLine(&argc, argv);
 
     ret_val = MPI_Init(&argc, &argv);
     
