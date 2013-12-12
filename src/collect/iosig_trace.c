@@ -71,6 +71,7 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec) {
 
     return;
 }
+
 void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec, const char * path)
 {
     struct timeval diffstart, diffend;
@@ -488,46 +489,9 @@ void get_operation(char *operation, int rec_operation)
 void getProcCmdLine (int *ac, char **av)
 {
     int i = 0, pid;
-    char *inbuf, file[256];
-    FILE *infile;
-    char *arg_ptr;
-
-    *ac = 0;
-    *av = NULL;
-
-    pid = getpid ();
-    snprintf (file, 256, "/proc/%d/cmdline", pid);
-    infile = __real_fopen (file, "r");
-
-    if (infile != NULL)
-    {
-        while (!feof (infile))
-        {
-            inbuf = malloc (IOSIG_MAX_ARG_STRING_SIZE);
-            if (__real_fread (inbuf, 1, IOSIG_MAX_ARG_STRING_SIZE, infile) > 0)
-            {
-                arg_ptr = inbuf;
-                while (*arg_ptr != '\0')
-                {
-                    av[i] = strdup (arg_ptr);
-                    arg_ptr += strlen (av[i]) + 1;
-                    i++;
-                }
-            }
-            free (inbuf);
-        }
-        *ac = i;
-
-        __real_fclose (infile);
-    }
-}
-
-void getProcCmdLine2 (int *ac, char **av)
-{
-    int i = 0, pid;
     int length = 0;
     char *inbuf;
-    char file[256];
+    char file[64];
     FILE *infile;
     char *arg_ptr;
 
@@ -535,7 +499,7 @@ void getProcCmdLine2 (int *ac, char **av)
     *av = NULL;
 
     pid = getpid ();
-    snprintf (file, 256, "/proc/%d/cmdline", pid);
+    snprintf (file, 64, "/proc/%d/cmdline", pid);
     infile = __real_fopen (file, "r");
 
     if (infile != NULL)
@@ -556,8 +520,10 @@ void getProcCmdLine2 (int *ac, char **av)
                 arg_ptr = av[0];
                 while (*arg_ptr != '\0')
                 {
-                    if (i!=0)
+                    if (i!=0) {
                         av[i] = arg_ptr;
+                        printf("%d: %s\n", i, arg_ptr);
+                    }
                     if ( (arg_ptr+strlen(av[i])+1) < av[0]+IOSIG_MAX_ARG_STRING_SIZE )
                         arg_ptr += strlen (av[i]) + 1;
                     i++;
@@ -571,19 +537,96 @@ void getProcCmdLine2 (int *ac, char **av)
     }
 }
 
+int getProcExe(char * buf, int len) {
+    int length;
+    int pid = getpid();
+    char file[64];
+    FILE *infile;
+
+    snprintf (file, 64, "/proc/%d/cmdline", pid);
+    infile = __real_fopen (file, "r");
+    if (infile != NULL) {
+        if (!feof (infile)) {
+            length =  __real_fread (buf, 1, len, infile);
+            if (length > 0) {
+                __real_fclose (infile);
+                return 0;
+            }
+        }
+    }
+    __real_fclose (infile);
+    return -1;
+}
+
+int getExeFullPath(char * buf, int len) {
+    ssize_t length = readlink("/proc/self/exe", buf, len);
+    if (length > 0) {
+        return 0;
+    }
+    return -1;
+}
+
+void generate_job_log() {
+
+}
+
+void global_init () {
+    /* Generate a job ID: job_id <- user_time_cmd */
+    char rawcmd[128];
+    char fullpath[128];
+    /*
+    if (getlogin_r(user_id, 32)) {
+        strcpy(user_id, "unknown");
+    }
+    */
+
+    
+    char * cmd;
+    if (getProcExe(rawcmd, 128)) {
+        strcpy(cmd, "unknown");
+        cmd = "unknown";
+    } else {
+        cmd = strrchr(rawcmd, '/')+1;
+        if (!cmd) {
+            cmd = "unknown";
+        }
+    }
+    
+    char * iosig_data_env = getenv("IOSIG_DATA");
+    if (iosig_data_env==NULL || strlen(iosig_data_env) < 2) {
+        iosig_data_env = ".";
+    }
+    char * username = getenv("USER");
+    if (username == NULL) {
+        username = "unknown";
+    }
+    strcpy(user_id, username);
+    sprintf(job_id, "%s_%ld_%s", user_id, bigbang.tv_sec, cmd);
+    sprintf(iosig_data_path, "%s/%s", iosig_data_env, job_id);
+    //printf("%s \n", iosig_data_path);
+
+    /* if iosig_data_path does not exist, create */
+    mkdir(iosig_data_path, S_IRWXU);
+
+    /* TODO: create job log */
+    generate_job_log();
+    getExeFullPath(fullpath, 128);
+    printf("FFFFFUUUULLLLLLLLLLLL: %s\n", fullpath);
+
+}
 
 void get_trace_file_path_pid(char *path, int trace_type) {
     int pid = getpid();
 
     switch (trace_type) {
         case TRACE_TYPE_EXE:
-            sprintf(path, "exe_trace_pid-%d.out", pid);
+            sprintf(path, "%s/exe_trace_pid-%d.out", iosig_data_path, pid);
             break;
         case TRACE_TYPE_MPIIO:
-            sprintf(path, "mpiio_trace_pid-%d.out", pid);
+            sprintf(path, "%s/mpiio_trace_pid-%d.out", iosig_data_path, pid);
             break;
         case TRACE_TYPE_POSIX:
-            sprintf(path, "posix_trace_pid-%d.out", pid);
+            sprintf(path, "%s/posix_trace_pid-%d.out", iosig_data_path, pid);
             break;
     }
 }
@@ -597,13 +640,13 @@ void get_trace_file_path_rank(char *path, int trace_type) {
 
     switch (trace_type) {
         case TRACE_TYPE_EXE:
-            sprintf(path, "exe_trace_rank-%d.out", my_rank);
+            sprintf(path, "%s/exe_trace_rank-%d.out", iosig_data_path, my_rank);
             break;
         case TRACE_TYPE_MPIIO:
-            sprintf(path, "mpiio_trace_rank-%d.out", my_rank);
+            sprintf(path, "%s/mpiio_trace_rank-%d.out", iosig_data_path, my_rank);
             break;
         case TRACE_TYPE_POSIX:
-            sprintf(path, "posix_trace_rank-%d.out", my_rank);
+            sprintf(path, "%s/posix_trace_rank-%d.out", iosig_data_path, my_rank);
             break;
     }
 }

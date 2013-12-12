@@ -18,6 +18,12 @@ void __attribute__ ((constructor)) trace_begin (void) {
     char trace_file_path[FILE_PATH_LENGTH];
     char exe_logtext[80];
 
+    gettimeofday(&bigbang, NULL);
+    current_depth = 0;
+
+    /* Initialize job_id and IOSIG_DATA_PATH */
+    global_init();
+
     /* initialize execution trace file */
     get_trace_file_path_pid(trace_file_path, TRACE_TYPE_EXE);
     exe_fp = __real_fopen64((char*)trace_file_path, (char*)"a");
@@ -30,8 +36,6 @@ void __attribute__ ((constructor)) trace_begin (void) {
     sprintf(exe_logtext, "#--------------------------------------\n");
     __real_fwrite(exe_logtext, strlen(exe_logtext), 1, posix_fp);
     
-    gettimeofday(&bigbang, NULL);
-    current_depth = 0;
 }
 
 void __attribute__ ((destructor)) trace_end (void) {
@@ -61,6 +65,9 @@ void __attribute__ ((destructor)) trace_end (void) {
     }
     
     /* TODO: translate the EXE traces to readable format */
+    /* TODO: on exit() being called, this function will not be called.
+     * Need to record the mapping between rank and pid 
+     */
 }
 
 void __cyg_profile_func_enter (void *func, void *caller) {

@@ -32,8 +32,8 @@ extern pthread_mutex_t posix_fp_mutex;
 FILE *out_fp; /* file pointer of the MPIIO trace file */
 FILE *exe_fp; /* file pointer of the execution trace file */
 FILE *posix_fp; /* file pointer of the POSIX I/O trace file */
-
 FILE *fp_rank;
+FILE *job_log;
 
 typedef struct iosig_mpiio_trace_record_t {
     int is_mpi_operation;
@@ -46,11 +46,16 @@ typedef struct iosig_mpiio_trace_record_t {
     struct timeval op_end_time;
 } iosig_mpiio_trace_record;
 
+/* Global variables */
 
-char mpiio_logtext[1024];    /* Pre define this variable here so the *_write_log()
-                         do not need to create it each time  */
+char mpiio_logtext[1024];    /* Pre define this variable here so the 
+                                _write_log()s do not need to create it each 
+                                time  */
 char posix_logtext[1024];
 char exe_logtext[1024];
+char job_id[128];
+char user_id[32];
+char iosig_data_path[256];
 
 iosig_mpiio_trace_record *iorec;   /* TODO: this is not thread safe.  */
 int thisrank;
@@ -92,6 +97,7 @@ void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec,
 int timeval_diff(struct timeval *result, struct timeval *x,
         struct timeval *y);
 void get_operation(char *operation, int rec_operation);
+void global_init();
 void get_trace_file_path_pid(char *path, int trace_type);
 void get_trace_file_path_rank(char *path, int trace_type);
 void IOSIG_backtrace();
