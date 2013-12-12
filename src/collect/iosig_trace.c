@@ -538,7 +538,7 @@ void getProcCmdLine (int *ac, char **av)
 }
 
 int getProcExe(char * buf, int len) {
-    int length, i = 0;
+    int length;
     int pid = getpid();
     char file[64];
     FILE *infile;
@@ -549,6 +549,7 @@ int getProcExe(char * buf, int len) {
         if (!feof (infile)) {
             length =  __real_fread (buf, 1, len, infile);
             if (length > 0) {
+                __real_fclose (infile);
                 return 0;
             }
         }
@@ -557,9 +558,22 @@ int getProcExe(char * buf, int len) {
     return -1;
 }
 
+int getExeFullPath(char * buf, int len) {
+    ssize_t length = readlink("/proc/self/exe", buf, len);
+    if (length > 0) {
+        return 0;
+    }
+    return -1;
+}
+
+void generate_job_log() {
+
+}
+
 void global_init () {
     /* Generate a job ID: job_id <- user_time_cmd */
     char rawcmd[128];
+    char fullpath[128];
     /*
     if (getlogin_r(user_id, 32)) {
         strcpy(user_id, "unknown");
@@ -578,7 +592,6 @@ void global_init () {
         }
     }
     
-    
     char * iosig_data_env = getenv("IOSIG_DATA");
     if (iosig_data_env==NULL || strlen(iosig_data_env) < 2) {
         iosig_data_env = ".";
@@ -594,6 +607,12 @@ void global_init () {
 
     /* if iosig_data_path does not exist, create */
     mkdir(iosig_data_path, S_IRWXU);
+
+    /* TODO: create job log */
+    generate_job_log();
+    getExeFullPath(fullpath, 128);
+    printf("FFFFFUUUULLLLLLLLLLLL: %s\n", fullpath);
+
 }
 
 void get_trace_file_path_pid(char *path, int trace_type) {

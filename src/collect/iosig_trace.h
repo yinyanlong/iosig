@@ -32,8 +32,8 @@ extern pthread_mutex_t posix_fp_mutex;
 FILE *out_fp; /* file pointer of the MPIIO trace file */
 FILE *exe_fp; /* file pointer of the execution trace file */
 FILE *posix_fp; /* file pointer of the POSIX I/O trace file */
-
 FILE *fp_rank;
+FILE *job_log;
 
 typedef struct iosig_mpiio_trace_record_t {
     int is_mpi_operation;
