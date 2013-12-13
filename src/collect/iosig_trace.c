@@ -579,16 +579,15 @@ void global_init () {
         strcpy(user_id, "unknown");
     }
     */
-
     
     char * cmd;
     if (getProcExe(rawcmd, 128)) {
-        strcpy(cmd, "unknown");
+        //strcpy(cmd, "unknown");
         cmd = "unknown";
     } else {
-        cmd = strrchr(rawcmd, '/')+1;
+        cmd = strrchr(rawcmd, '/');
         if (!cmd) {
-            cmd = "unknown";
+            cmd = rawcmd;
         }
     }
     
@@ -609,9 +608,11 @@ void global_init () {
     mkdir(iosig_data_path, S_IRWXU);
 
     /* TODO: create job log */
+    /*
     generate_job_log();
     getExeFullPath(fullpath, 128);
     printf("FFFFFUUUULLLLLLLLLLLL: %s\n", fullpath);
+    */
 
 }
 

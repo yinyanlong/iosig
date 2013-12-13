@@ -19,15 +19,15 @@ import sig
 class Access:
     def __init__(self, value=[]):
         if sig._format_prop == None:
-            self.mpi_rank = int(value[1])
+            #self.mpi_rank = int(value[1])
+            self.op = value[1]
             self.file_id = int(value[2])
-            self.size = int(value[4])
             self.pos = int(value[3])
-            self.op = value[6]
+            self.size = int(value[4])
             self.startTime = float(value[5])
-            self.endTime = float(value[7])
+            self.endTime = float(value[6])
         else:
-            self.mpi_rank = int(value[ int(sig._format_prop['mpi_rank']) ])
+            #self.mpi_rank = int(value[ int(sig._format_prop['mpi_rank']) ])
             if  int(sig._format_prop['file_id']) >= 0:
                 self.file_id = int(value[ int(sig._format_prop['file_id']) ])
             self.size = int(value[ int(sig._format_prop['size']) ])

@@ -38,6 +38,7 @@ global _format_file
 global _format_prop
 global _protobuf
 global _out_path
+global _trace_file
 
 global _total_read_time
 global _total_write_time
@@ -52,6 +53,7 @@ sig._format_file = "standard.properties"
 sig._format_prop = None
 sig._protobuf = 0
 sig._out_path = "./result_output"
+sig._trace_file = ""
 
 # usage
 def usage():
@@ -83,6 +85,7 @@ def main(argv):
             sig._protobuf = 1
         elif opt in ("-f", "--filename"):
             filename = arg
+            sig._trace_file = arg
         elif opt in ("-r", "--range"):
             sig._range = int(arg)
         elif opt in ("-b", "--blksz"):
@@ -110,7 +113,7 @@ def main(argv):
 
     # detect patterns
     # and generates IO rates figure
-    detectSignature(filename)
+    # detectSignature(filename)
 
     # generate iorates figure
     # generateIORates(filename)
@@ -142,6 +145,7 @@ def detectSignature(filename):
     debugPrint ('op_index: ', op_index)
     op = ''
 
+    # TODO: add while 1 loop here
     for i in range(sig._range):
         line = f.readline()
         if not line:
@@ -165,7 +169,7 @@ def detectSignature(filename):
         accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
-            debugPrint("one READ")
+            #debugPrint("one READ")
             rlist.append(acc)
 
         if op.count('WRITE')>0 or op == 'W':
@@ -178,6 +182,9 @@ def detectSignature(filename):
     wlist.trace = filename
     accList.trace = filename
 
+    # print the time summary
+    print 'Total read time: ', sig._total_read_time
+    print 'Total write time: ', sig._total_write_time
     print 'Numbers of operations - ', 'Read: ', len(rlist), ' write: ', len(wlist)
 
     ## deal with the list
@@ -265,13 +272,13 @@ def generateRWBWFigs(filename):
         # here the write operation should be "append"
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
-            output=sig._out_path+"/read.dat"
+            output = sig._out_path + "/" + sig._trace_file + ".read.dat"
             rlist.toIORStep(output, 1) # 1 for read
-            rlistEmpty = 0
+            rlistEmpty = 0   # TODO: not efficient
         if (len(wlist) > 0):
-            output=sig._out_path+"/write.dat"
+            output = sig._out_path + "/" + sig._trace_file + ".write.dat"
             wlist.toIORStep(output, 2) # 2 for write
-            wlistEmpty = 0
+            wlistEmpty = 0   # TODO: not efficient
 
         # empty the two lists
         rlist = AccList()
@@ -282,23 +289,23 @@ def generateRWBWFigs(filename):
         if eof == 1:
             break
 
-
     ## close the opened file
     f.close()
     if (rlistEmpty == 1):
-        readF = open("result_output/read.dat", 'a+')
+        readF = open(sig._out_path + "/" + sig._trace_file + ".read.dat", 'a+')
         readF.write( "{0} {1}\n".format(0, 0) )
         readF.close()
     else:
         print "gnuplot"
-        # gnuplot
+        # TODO: gnuplot
+
     if (wlistEmpty == 1):
-        writeF = open("result_output/write.dat", 'a+')
+        writeF = open(sig._out_path + "/" + sig._trace_file + ".write.dat", 'a+')
         writeF.write( "{0} {1}\n".format(0, 0) )
         writeF.close()
     else:
         print "gnuplot"
-        # gnuplot
+        # TODO: gnuplot
     
 if __name__ == '__main__':
     main(sys.argv[1:])

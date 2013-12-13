@@ -712,11 +712,15 @@ class AccList(list):
         peakRate = 0
         
         tuples = []
+        opTime = 0.0
         for i in range(len(self)):
             acc = self[i]
             if acc.endTime > endTime:
                 endTime = acc.endTime
-            rate = acc.size/(acc.endTime-acc.startTime)/1000.0/1000.0
+            opTime = acc.endTime-acc.startTime 
+            if opTime <= 0:
+                opTime = 0.0000005
+            rate = acc.size/opTime/1000.0/1000.0
             if rate > peakRate:
                 peakRate = rate
             oper = acc.startTime, acc.endTime, rate
