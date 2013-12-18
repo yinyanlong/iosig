@@ -1,8 +1,9 @@
-MPIPATH		= /export/home/yyin/common/program_files/mpich2-1.4.1p1
-INSTALL_DIR	= /export/home/yyin/install
+MPIPATH		= /mnt/common/kfeng/mpich2-1.5
+INSTALL_DIR	= /mnt/common/kfeng/IOSIG
 
 C_COMPILER	= gcc
 F_COMPILER	= gfortran
+INSTALL		= /usr/bin/install -c
 
 V = 0
 AT_0 := @
@@ -33,6 +34,8 @@ COMMON_CFLAGS	:= $(COMMON_CFLAGS) -lpthread
 
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/ch3/include                 # mpidpost.h
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/datatype             # mpid_datatype.h
+MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/sched                # mpid_sched_pre.h
+MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/thread               # mpid_thread.h
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/ch3/channels/sock/include   # mpidi_ch3_post.h
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/sock                 # for older version of mpich2
 MPIIO_CFLAGS	:= $(MPIIO_CFLAGS) -I${MPIPATH}/src/mpid/common/sock/poll            # for older version of mpich2
@@ -72,7 +75,8 @@ iosig: $(TRC_OBJS) $(FC_OBJS)
 	@echo "Completed. Next, make install."
 
 install: iosig
-	cp libiosig.a ${INSTALL_DIR}/lib
+	install -d ${INSTALL_DIR}/lib
+	install -m 644 libiosig.a ${INSTALL_DIR}/lib
 
 clean::
 	rm -f *.o
