@@ -729,8 +729,9 @@ class AccList(list):
         ops = get_rate_serie(tuples, 0, endTime)
 
         f = open(outputDataFile, 'a+')
+        f.write("Time,Rate\n")
         for op in ops:
-            f.write( "{0} {1}\n".format(op[0], op[2]) )
+            f.write( "{0},{1}\n".format(op[0], op[2]) )
             if op[2] > 0 and theInteger == 1:
                 sig._total_read_time += op[1]-op[0] 
             if op[2] > 0 and theInteger == 2:

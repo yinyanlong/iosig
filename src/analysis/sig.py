@@ -272,11 +272,11 @@ def generateRWBWFigs(filename):
         # here the write operation should be "append"
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".read.dat"
+            output = sig._out_path + "/" + sig._trace_file + ".read.csv"
             rlist.toIORStep(output, 1) # 1 for read
             rlistEmpty = 0   # TODO: not efficient
         if (len(wlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".write.dat"
+            output = sig._out_path + "/" + sig._trace_file + ".write.csv"
             wlist.toIORStep(output, 2) # 2 for write
             wlistEmpty = 0   # TODO: not efficient
 
