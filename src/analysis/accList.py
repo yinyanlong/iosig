@@ -729,7 +729,7 @@ class AccList(list):
         ops = get_rate_serie(tuples, 0, endTime)
 
         f = open(outputDataFile, 'a+')
-        f.write("Time,Rate\n")
+        #f.write("Time,Rate\n")
         for op in ops:
             f.write( "{0},{1}\n".format(op[0], op[2]) )
             if op[2] > 0 and theInteger == 1:
@@ -737,6 +737,17 @@ class AccList(list):
             if op[2] > 0 and theInteger == 2:
                 sig._total_write_time += op[1]-op[0] 
 
+        f.close()
+
+    def toDataAccessHoleSizes(self, outputDataFile):
+        """Generate the CSV file for drawing access holes figure"""
+        f = open(outputDataFile, 'a+')
+        lastFileCursor = self[0].pos
+        for acc in self:
+            hole = acc.pos - lastFileCursor
+            if hole != 0:
+                f.write("{0},{1}\n".format(acc.startTime, hole))
+            lastFileCursor = acc.pos+acc.size
         f.close()
 
 def get_rate_serie(op_tuples, start, end):
@@ -773,8 +784,6 @@ def get_rate_serie(op_tuples, start, end):
                     step = cursor, op[1], (op[2]+next_op[2])
                     new_tuples.append(step)
                     #else:
-
-
                 else:
                     step = cursor, op[1], op[2]
                     new_tuples.append(step)

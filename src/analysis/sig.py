@@ -111,16 +111,16 @@ def main(argv):
         os.makedirs(sig._out_path)
     # Finished handling arguments
 
-    # detect patterns
-    # and generates IO rates figure
-    # detectSignature(filename)
-
     # generate iorates figure
     # generateIORates(filename)
 
     # translate the list to "step data" into "*.dat" files
     # generate R/W bandwidth over time figures
     generateRWBWFigs(filename)
+
+    # detect patterns
+    # and generates IO rates figure
+    # detectSignature(filename)
 
 def detectSignature(filename):
     # the list contains all the accesses
@@ -169,7 +169,7 @@ def detectSignature(filename):
         accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
-            #debugPrint("one READ")
+            debugPrint("one READ")
             rlist.append(acc)
 
         if op.count('WRITE')>0 or op == 'W':
@@ -211,6 +211,8 @@ def detectSignature(filename):
         accList.gen_iorates(sig._out_path)
 
 def generateRWBWFigs(filename):
+    """Generate the Read/Write Bandwidth figures"""
+
     # the list contains all the accesses
     rlist = AccList()
     wlist = AccList()
@@ -221,6 +223,20 @@ def generateRWBWFigs(filename):
     f = open(filename, 'r')
     #read_rate_output_file = open("result_output/read.dat", 'a')
     #write_rate_output_file = open("result_output/write.dat", 'a')
+
+    # Create and empty each CSV files, write the CSV title line
+    output = sig._out_path + "/" + sig._trace_file + ".read.ratio.csv"
+    f = open(output, 'w')
+    f.write("Time,Rate\n")
+    f.close()
+    output = sig._out_path + "/" + sig._trace_file + ".write.ratio.csv"
+    f = open(output, 'w')
+    f.write("Time,Rate\n")
+    f.close()
+    output = sig._out_path + "/" + sig._trace_file + ".read.hole.sizes.csv"
+    f = open(output, 'w')
+    f.write("Time,Size\n")
+    f.close()
 
     # skip the first several lines
     # Maybe the skipped lines are table heads
@@ -268,17 +284,19 @@ def generateRWBWFigs(filename):
                 wlist.append(acc)
         # finish reading a batch of 5000 lines of the trace file
 
-        # translate the list to "step data" into "*.dat" files
+        # translate the list to "step data" into "*.csv" files
         # here the write operation should be "append"
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
             output = sig._out_path + "/" + sig._trace_file + ".read.csv"
             rlist.toIORStep(output, 1) # 1 for read
-            rlistEmpty = 0   # TODO: not efficient
+            output = sig._out_path + "/" + sig._trace_file + ".read.hole.sizes.csv"
+            rlist.toDataAccessHoleSizes()
+            rlistEmpty = 0
         if (len(wlist) > 0):
             output = sig._out_path + "/" + sig._trace_file + ".write.csv"
             wlist.toIORStep(output, 2) # 2 for write
-            wlistEmpty = 0   # TODO: not efficient
+            wlistEmpty = 0
 
         # empty the two lists
         rlist = AccList()
