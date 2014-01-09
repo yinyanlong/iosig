@@ -744,8 +744,8 @@ class AccList(list):
         f = open(outputDataFile, 'a+')
         lastFileCursor = self[0].pos
         for acc in self:
-            hole = acc.pos - lastFileCursor
-            if hole != 0:
+            if acc.pos > lastFileCursor:
+                hole = acc.pos - lastFileCursor
                 f.write("{0},{1}\n".format(acc.startTime, hole))
             lastFileCursor = acc.pos+acc.size
         f.close()

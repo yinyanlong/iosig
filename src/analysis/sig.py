@@ -219,17 +219,15 @@ def generateRWBWFigs(filename):
     rlistEmpty = 1
     wlistEmpty = 1
 
-    # open the trace file
-    f = open(filename, 'r')
     #read_rate_output_file = open("result_output/read.dat", 'a')
     #write_rate_output_file = open("result_output/write.dat", 'a')
 
     # Create and empty each CSV files, write the CSV title line
-    output = sig._out_path + "/" + sig._trace_file + ".read.ratio.csv"
+    output = sig._out_path + "/" + sig._trace_file + ".read.rate.csv"
     f = open(output, 'w')
     f.write("Time,Rate\n")
     f.close()
-    output = sig._out_path + "/" + sig._trace_file + ".write.ratio.csv"
+    output = sig._out_path + "/" + sig._trace_file + ".write.rate.csv"
     f = open(output, 'w')
     f.write("Time,Rate\n")
     f.close()
@@ -238,6 +236,8 @@ def generateRWBWFigs(filename):
     f.write("Time,Size\n")
     f.close()
 
+    # open the trace file
+    f = open(filename, 'r')
     # skip the first several lines
     # Maybe the skipped lines are table heads
     for i in range(int(sig._format_prop['skip_lines'])):
@@ -288,13 +288,13 @@ def generateRWBWFigs(filename):
         # here the write operation should be "append"
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".read.csv"
+            output = sig._out_path + "/" + sig._trace_file + ".read.rate.csv"
             rlist.toIORStep(output, 1) # 1 for read
             output = sig._out_path + "/" + sig._trace_file + ".read.hole.sizes.csv"
-            rlist.toDataAccessHoleSizes()
+            rlist.toDataAccessHoleSizes(output)
             rlistEmpty = 0
         if (len(wlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".write.csv"
+            output = sig._out_path + "/" + sig._trace_file + ".write.rate.csv"
             wlist.toIORStep(output, 2) # 2 for write
             wlistEmpty = 0
 
