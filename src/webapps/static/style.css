@@ -3,6 +3,13 @@ a, h1, h2       { color: #377ba8; }
 h1              { border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
+.trace_entry    { width: 700px; }
+.table_header    { color: #999; }
+.table_header_c3 { margin: 0.1em; float: left; width: 350px; }
+.trace_entry_user { margin: 0.1em; float: left; width: 100px; }
+.trace_entry_date { margin: 0.1em; float: left; width: 200px; }
+.trace_entry_app { margin: 0.1em; float: left; width: 350px; font-family: Monaco, Consolas, "Lucida Console", monospace; }
+
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc;
     padding: 0.8em; background: white; }
 .entries        { list-style: none; margin: 0; padding: 0; }

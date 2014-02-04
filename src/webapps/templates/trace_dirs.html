@@ -7,11 +7,20 @@
 <h1>IOSIG Web Dashboard</h1>
 
 {% if list %}
-<h4>Application history. Click one for more details.</h4>
+<h4>Click application names for details.</h4>
+  <div class="trace_entry, table_header">
+    <div class="trace_entry_user">USER</div>
+    <div class="trace_entry_date">DATE</div>
+    <div class="table_header_c3">APPLICATION</div>
+  </div>
   {% for dir in list %}
-    <p> {{ dir }}</p>
+  <div class="trace_entry">
+        <div class="trace_entry_user">{{ dir[0] }}</div>
+        <div class="trace_entry_date">{{ dir[1] }}</div>
+        <div class="trace_entry_app">{{ dir[2] }}</div>
+    </div>
   {% endfor %}
 {% else %}
-  <h1>No traces!</h1>
+  <h4>No traces!</h4>
 {% endif %}
 </body>

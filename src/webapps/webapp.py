@@ -1,4 +1,5 @@
 import os
+import datetime
 from flask import Flask
 from flask import render_template
 
@@ -26,7 +27,14 @@ def list_trace_dirs():
         return render_template('trace_dirs.html', list=None)
     dirs = [ trace_dir for trace_dir in os.listdir(iosig_data_path) if os.path.isdir(os.path.join(iosig_data_path, trace_dir)) ]
     dirs.sort()
-    return render_template('trace_dirs.html', list=dirs)
+    dirs_list = []
+    for directory in dirs:
+        user, separator, the_rest = directory.partition('_')
+        ts_epoch, separator, exe_name = the_rest.partition('_')
+        date_string = datetime.datetime.fromtimestamp(float(ts_epoch)).strftime('%Y-%m-%d %H:%M:%S')
+        dirs_list.append([user, date_string, exe_name])
+
+    return render_template('trace_dirs.html', list=dirs_list)
 
 if __name__ == '__main__':
     app.debug = True
