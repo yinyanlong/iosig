@@ -1,0 +1,17 @@
+<!doctype html>
+<head>
+<link rel="stylesheet" href="/static/style.css" type="text/css" />
+<title>IOSIG Web Dashboard</title>
+</head>
+<body>
+<h1>IOSIG Web Dashboard</h1>
+
+{% if list %}
+<h4>Application history. Click one for more details.</h4>
+  {% for dir in list %}
+    <p> {{ dir }}</p>
+  {% endfor %}
+{% else %}
+  <h1>No traces!</h1>
+{% endif %}
+</body>
