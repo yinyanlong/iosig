@@ -7,9 +7,9 @@ all: python
 python: detect_iosig
 
 clean:
-	rm detect_iosig
-	rm protoc_middleman signatureList_pb2.py
-	rm *.pyc
+	rm -f detect_iosig
+	rm -f protoc_middleman signatureList_pb2.py
+	rm -f *.pyc
 
 protoc_middleman: signatureList.proto
 	protoc --python_out=. signatureList.proto

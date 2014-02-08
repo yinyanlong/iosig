@@ -10,7 +10,7 @@ Usage:  python sig.py [options][source]
 
 Options:
   -h, --help                show this help
-  -d                        show debugging information while parsing
+  -g                        show debugging information while parsing
   -f ..., --filename=...    the filename of the trace file
   -b ..., --blksz=...       size of block for block based detection
   -r ..., --range=...       # of entries will be processed
@@ -20,8 +20,8 @@ Options:
 
 __author__ = "Yanlong Yin (yyin2@iit.edu)"
 __version__ = "$Revision: 1.4$"
-__date__ = "$Date: 10/03/2011 18:03:33 $"
-__copyright__ = "Copyright (c) 2010-2011 SCS-Lab, IIT"
+__date__ = "$Date: 02/08/2014 $"
+__copyright__ = "Copyright (c) 2010-2014 SCS Lab, IIT"
 __license__ = "Python"
 
 import sys, os, string, getopt, gc
@@ -54,6 +54,7 @@ sig._format_prop = None
 sig._protobuf = 0
 sig._out_path = "./result_output"
 sig._trace_file = ""
+sig._trace_path = ""
 
 # usage
 def usage():
@@ -62,6 +63,21 @@ def usage():
 # main function
 def main(argv):
     """Main method of this software"""
+    parse_args(argv)
+    # generate iorates figure
+    # generateIORates(filename)
+
+    # translate the list to "step data" into "*.dat" files
+    # generate R/W bandwidth over time figures
+    generateCSVs(sig._trace_file)
+
+    # detect patterns
+    # and generates IO rates figure
+    # detectSignature(filename)
+
+# main function
+def parse_args(argv):
+    """The method parses the command arguments."""
 
     if len(argv) == 0:
         usage()
@@ -70,7 +86,7 @@ def main(argv):
     filename = ''
     # deal with command arguments
     try:
-        opts, args = getopt.getopt(argv, "hdr:b:f:m:", ["help", "range=", "blksz=", "filename=", "formatFile="])
+        opts, args = getopt.getopt(argv, "hgpr:b:f:m:d:", ["help", "debug", "protobuf", "range=", "blksz=", "filename=", "formatFile=", "directory="])
     except getopt.GetoptError:
         usage()
         sys.exit(2)
@@ -79,18 +95,19 @@ def main(argv):
         if opt in ("-h", "--help"):
             usage()
             sys.exit()
-        elif opt in ("-d"):
+        elif opt in ("-g", "--debug"):
             sig._debug = 1
-        elif opt in ("-p"):
+        elif opt in ("-p", "--protobuf"):
             sig._protobuf = 1
         elif opt in ("-f", "--filename"):
             filename = arg
             sig._trace_file = arg
+        elif opt in ("-d", "--directory"):
+            sig._trace_path = arg
         elif opt in ("-r", "--range"):
             sig._range = int(arg)
         elif opt in ("-b", "--blksz"):
             sig._blksz = int(arg) * 1024
-            debugPrint( 'xxxxxxxxxx', sig._blksz)
         elif opt in ("-m", "--formatFile"):
             sig._format_file = arg
 
@@ -110,17 +127,6 @@ def main(argv):
         print "Output put directory does not exist, create it."
         os.makedirs(sig._out_path)
     # Finished handling arguments
-
-    # generate iorates figure
-    # generateIORates(filename)
-
-    # translate the list to "step data" into "*.dat" files
-    # generate R/W bandwidth over time figures
-    generateRWBWFigs(filename)
-
-    # detect patterns
-    # and generates IO rates figure
-    # detectSignature(filename)
 
 def detectSignature(filename):
     # the list contains all the accesses
@@ -210,7 +216,7 @@ def detectSignature(filename):
     #if len(accList) > 0:
         accList.gen_iorates(sig._out_path)
 
-def generateRWBWFigs(filename):
+def generateCSVs(filename):
     """Generate the Read/Write Bandwidth figures"""
 
     # the list contains all the accesses
@@ -218,6 +224,11 @@ def generateRWBWFigs(filename):
     wlist = AccList()
     rlistEmpty = 1
     wlistEmpty = 1
+
+    total_read_count = 0
+    total_write_count = 0
+    total_read_time = 0.0
+    total_write_time = 0.0
 
     #read_rate_output_file = open("result_output/read.dat", 'a')
     #write_rate_output_file = open("result_output/write.dat", 'a')
@@ -278,10 +289,14 @@ def generateRWBWFigs(filename):
             if op.count('READ')>0 or op == 'R':
                 debugPrint("one READ")
                 rlist.append(acc)
+                total_read_count += 1
+                total_read_time += acc.endTime - acc.startTime
 
             if op.count('WRITE')>0 or op == 'W':
                 debugPrint("one WRITE")
                 wlist.append(acc)
+                total_write_count += 1
+                total_write_time += acc.endTime - acc.startTime
         # finish reading a batch of 5000 lines of the trace file
 
         # translate the list to "step data" into "*.csv" files
@@ -323,6 +338,16 @@ def generateRWBWFigs(filename):
         writeF.close()
     else:
         print "gnuplot"
+
+    # save the statistics information to files
+    output = sig._out_path + "/" + sig._trace_file + ".statistics.dat"
+    f = open(output, 'a+')
+    f.write("total_read_time: {0}\n".format(total_read_time))
+    f.write("total_read_count: {0}\n".format(total_read_count))
+    f.write("total_write_time: {0}\n".format(total_write_time))
+    f.write("total_write_count: {0}\n".format(total_write_count))
+    f.write("global_total_read_time: {0}\n".format(sig._total_read_time))
+    f.write("global_total_write_time: {0}\n".format(sig._total_write_time))
         # TODO: gnuplot
     
 if __name__ == '__main__':
