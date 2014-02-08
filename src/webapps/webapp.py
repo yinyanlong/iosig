@@ -4,6 +4,7 @@ import string
 
 from flask import Flask
 from flask import render_template
+from flask import send_from_directory
 from flask import Blueprint
 
 app = Flask(__name__)
@@ -11,6 +12,11 @@ iosig_data_path = os.getenv('IOSIG_DATA')
 print 'root path: ', app.root_path
 iosig_data = Blueprint('iosig_data', __name__, url_prefix='/iosig_data', static_folder=iosig_data_path)
 app.register_blueprint(iosig_data)
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'),
+            'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
 @app.route('/')
 @app.route('/iosig')
@@ -63,5 +69,5 @@ def show_trace_details(trace_id):
 
 if __name__ == '__main__':
     app.debug = True
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=5000)
 

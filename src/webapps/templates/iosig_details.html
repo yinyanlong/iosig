@@ -4,20 +4,27 @@
 <title>Details - {{trace_id}}</title>
 </head>
 <body>
-<h1>Details - {{trace_id}}</h1>
+    <h1>Details - {{trace_id}}</h1>
 
 
 {% if figure_list %}
   <table>
   {% for figure in figure_list %}
       <tr>
-          <td><span>{{figure[0]}}</span></td>
+          <td>
+              <span class="proc_id">{{figure[0]}}</span>
+          </td>
+          <td>
+              <a href="#">EXE Trace</a>
+              <br>
+              <a href="#">I/O Trace</a>
+          </td>
           <td><img src='{{ url_for('iosig_data.static', filename=figure[1]) }}' /></td>
           <td>
               {% if figure[2] %}
               <img src='{{ url_for('iosig_data.static', filename=figure[2]) }}' />
               {% else %}
-              <span>The pattern is contiguous, so no holes between two accesses.</span>
+              <span>Data access pattern: Contiguous.</span>
               {% endif %}
           </td>
       </tr>

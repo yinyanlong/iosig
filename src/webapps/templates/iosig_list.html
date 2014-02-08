@@ -8,7 +8,8 @@
 
 {% if list %}
 <h4>Click application names for details.</h4>
-  <div class="trace_entry, table_header">
+  <div class="container">
+  <div class="table_header">
     <div class="trace_entry_user">USER</div>
     <div class="trace_entry_date">DATE</div>
     <div class="table_header_c3">APPLICATION</div>
@@ -17,9 +18,10 @@
   <div class="trace_entry">
         <div class="trace_entry_user">{{ dir[0] }}</div>
         <div class="trace_entry_date">{{ dir[1] }}</div>
-        <div class="trace_entry_app">{{ dir[2] }}</div>
+        <div class="trace_entry_app"><a href="/details/{{ dir[3] }}">{{ dir[2] }}</a></div>
     </div>
   {% endfor %}
+</div>
 {% else %}
   <h4>No traces!</h4>
 {% endif %}

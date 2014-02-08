@@ -1,5 +1,5 @@
-body            { font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif; background: #eee; }
-h1              { border-bottom: 2px solid #eee; }
+body            { font-family: "Segoe UI Light", "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif; background: #eee; }
+h1              { font-family: "Segoe UI"; border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
 
 .container      { width: 700px; }
@@ -10,8 +10,9 @@ h2              { font-size: 1.2em; }
 .trace_entry_app { margin: 0.1em; float: left; width: 350px; font-family: Monaco, Consolas, "Lucida Console", monospace; }
 .trace_entry_fill {display:block; width:100%; height:100%; z-index:10; }
 
-.table_header    { width: 700px; color: #999; float: left;}
+.table_header    { font-family: "Segoe UI"; width: 700px; color: #999; float: left;}
 .table_header_c3 { margin: 0.1em; float: left; width: 350px; }
+.proc_id         { display: inline-block; background: #555; color: #fff; padding: 0.2em; border-radius: 1em; margin: 0.2em; }
 
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc;
     padding: 0.8em; background: white; }
