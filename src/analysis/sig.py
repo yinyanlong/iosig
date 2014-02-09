@@ -49,10 +49,10 @@ sig._total_write_time = 0.0
 sig._range = 5000 #5000 each time, so mem consumption is about 5000 lines
 sig._blksz = 0
 sig._debug = 0
-sig._format_file = "standard.properties"
+sig._format_file = "format.properties"
 sig._format_prop = None
 sig._protobuf = 0
-sig._out_path = "./result_output"
+sig._out_path = "result_output"
 sig._trace_file = ""
 sig._trace_path = ""
 
@@ -69,7 +69,13 @@ def main(argv):
 
     # translate the list to "step data" into "*.dat" files
     # generate R/W bandwidth over time figures
-    generateCSVs(sig._trace_file)
+    if len(sig._trace_path) > 0 and os.path.isdir(sig._trace_path):
+        posix_traces = [ filename for filename in os.listdir(sig._trace_path) if filename.startswith('posix') ]
+        for single_trace in posix_traces:
+            generateCSVs(single_trace)
+    else:
+        if len(sig._trace_file) > 0 and os.path.isfile(sig._trace_file):
+            generateCSVs(sig._trace_file)
 
     # detect patterns
     # and generates IO rates figure
@@ -83,7 +89,6 @@ def parse_args(argv):
         usage()
         sys.exit(2)
         
-    filename = ''
     # deal with command arguments
     try:
         opts, args = getopt.getopt(argv, "hgpr:b:f:m:d:", ["help", "debug", "protobuf", "range=", "blksz=", "filename=", "formatFile=", "directory="])
@@ -100,10 +105,9 @@ def parse_args(argv):
         elif opt in ("-p", "--protobuf"):
             sig._protobuf = 1
         elif opt in ("-f", "--filename"):
-            filename = arg
-            sig._trace_file = arg
+            sig._trace_file = os.path.abspath(arg)
         elif opt in ("-d", "--directory"):
-            sig._trace_path = arg
+            sig._trace_path = os.path.abspath(arg)
         elif opt in ("-r", "--range"):
             sig._range = int(arg)
         elif opt in ("-b", "--blksz"):
@@ -117,12 +121,18 @@ def parse_args(argv):
     debugPrint( sig._format_prop.items())
     debugPrint( sig._format_prop['skip_lines'])
 
-    if filename and os.path.isfile(filename):
-        print "Using trace file: " + filename
+    if len(sig._trace_path) > 0 and os.path.isdir(sig._trace_path):
+        print "Processing the traces in path: " + sig._trace_path
+        sig._out_path = os.path.join(sig._trace_path, sig._out_path)
     else:
-        print '\033[1;41mSorry, trace file \''+filename+'\' does not exist!\033[1;m'
-        sys.exit()
+        if len(sig._trace_file) > 0 and os.path.isfile(sig._trace_file):
+            print "Processing one trace file: " + sig._trace_file
+            sig._out_path = os.path.join( os.path.dirname(sig._trace_file), sig._out_path )
+        else:
+            print '\033[1;41mSorry, trace file \''+sig._trace_file+'\' does not exist!\033[1;m'
+            sys.exit()
 
+    #sig._out_path = os.path.abspath(sig._out_path)
     if not os.path.isdir(sig._out_path):
         print "Output put directory does not exist, create it."
         os.makedirs(sig._out_path)
@@ -216,8 +226,9 @@ def detectSignature(filename):
     #if len(accList) > 0:
         accList.gen_iorates(sig._out_path)
 
-def generateCSVs(filename):
+def generateCSVs(single_trace_filename):
     """Generate the Read/Write Bandwidth figures"""
+    trace_path, trace_filename = os.path.split(single_trace_filename)
 
     # the list contains all the accesses
     rlist = AccList()
@@ -230,25 +241,22 @@ def generateCSVs(filename):
     total_read_time = 0.0
     total_write_time = 0.0
 
-    #read_rate_output_file = open("result_output/read.dat", 'a')
-    #write_rate_output_file = open("result_output/write.dat", 'a')
-
     # Create and empty each CSV files, write the CSV title line
-    output = sig._out_path + "/" + sig._trace_file + ".read.rate.csv"
+    output = os.path.join(sig._out_path, trace_filename + ".read.rate.csv")
     f = open(output, 'w')
     f.write("Time,Rate\n")
     f.close()
-    output = sig._out_path + "/" + sig._trace_file + ".write.rate.csv"
+    output = os.path.join(sig._out_path, trace_filename + ".write.rate.csv")
     f = open(output, 'w')
     f.write("Time,Rate\n")
     f.close()
-    output = sig._out_path + "/" + sig._trace_file + ".read.hole.sizes.csv"
+    output = os.path.join(sig._out_path, trace_filename + ".read.hole.sizes.csv")
     f = open(output, 'w')
     f.write("Time,Size\n")
     f.close()
 
     # open the trace file
-    f = open(filename, 'r')
+    f = open(single_trace_filename, 'r')
     # skip the first several lines
     # Maybe the skipped lines are table heads
     for i in range(int(sig._format_prop['skip_lines'])):
@@ -303,13 +311,16 @@ def generateCSVs(filename):
         # here the write operation should be "append"
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".read.rate.csv"
+            output = os.path.join(sig._out_path, trace_filename + ".read.rate.csv")
+            print "out_path " + sig._out_path
+            print "trace_filename " + trace_filename
+            print "OOOOOOOutput: " + output
             rlist.toIORStep(output, 1) # 1 for read
-            output = sig._out_path + "/" + sig._trace_file + ".read.hole.sizes.csv"
+            output = os.path.join(sig._out_path, trace_filename + ".read.hole.sizes.csv")
             rlist.toDataAccessHoleSizes(output)
             rlistEmpty = 0
         if (len(wlist) > 0):
-            output = sig._out_path + "/" + sig._trace_file + ".write.rate.csv"
+            output = os.path.join(sig._out_path, trace_filename + ".write.rate.csv")
             wlist.toIORStep(output, 2) # 2 for write
             wlistEmpty = 0
 
@@ -325,7 +336,7 @@ def generateCSVs(filename):
     ## close the opened file
     f.close()
     if (rlistEmpty == 1):
-        readF = open(sig._out_path + "/" + sig._trace_file + ".read.dat", 'a+')
+        readF = open( os.path.join(sig._out_path, trace_filename + ".read.rate.csv"), 'a+')
         readF.write( "{0} {1}\n".format(0, 0) )
         readF.close()
     else:
@@ -333,14 +344,15 @@ def generateCSVs(filename):
         # TODO: gnuplot
 
     if (wlistEmpty == 1):
-        writeF = open(sig._out_path + "/" + sig._trace_file + ".write.dat", 'a+')
+        writeF = open( os.path.join(sig._out_path, trace_filename + ".write.rate.csv"), 'a+')
         writeF.write( "{0} {1}\n".format(0, 0) )
         writeF.close()
     else:
         print "gnuplot"
+        # TODO: gnuplot
 
     # save the statistics information to files
-    output = sig._out_path + "/" + sig._trace_file + ".statistics.dat"
+    output = os.path.join(sig._out_path, trace_filename + ".statistics.properties")
     f = open(output, 'a+')
     f.write("total_read_time: {0}\n".format(total_read_time))
     f.write("total_read_count: {0}\n".format(total_read_count))
@@ -348,7 +360,6 @@ def generateCSVs(filename):
     f.write("total_write_count: {0}\n".format(total_write_count))
     f.write("global_total_read_time: {0}\n".format(sig._total_read_time))
     f.write("global_total_write_time: {0}\n".format(sig._total_write_time))
-        # TODO: gnuplot
     
 if __name__ == '__main__':
     main(sys.argv[1:])
