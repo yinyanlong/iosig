@@ -48,11 +48,14 @@ def show_trace_details(trace_id):
     #figures = [ os.path.join(sub_path, figure) for figure in os.listdir(analysis_result_path) if figure.endswith('png') ]
     #figures.sort()
     iorate_figures = [ os.path.join(sub_path, figure) for figure in os.listdir(analysis_result_path) if figure.endswith('iorate.png') ]
-    access_hole_figures = [ os.path.join(sub_path, figure) for figure in os.listdir(analysis_result_path) if figure.endswith('hole.png') ]
+    #access_hole_figures = [ os.path.join(sub_path, figure) for figure in os.listdir(analysis_result_path) if figure.endswith('hole.png') ]
     iorate_figures.sort()
-    access_hole_figures.sort()
+    #access_hole_figures.sort()
+    # TODO: access hole figures may not be generated
     figure_list = []
-    for i in range(len(iorate_figures)):
+    iorate_figures_count = len(iorate_figures)
+
+    for i in range(iorate_figures_count):
         proc_info = (iorate_figures[i].partition("."))[0]
         r_index = string.rfind(proc_info, '_')
         proc_info = string.upper(proc_info[r_index+1:])
@@ -60,8 +63,8 @@ def show_trace_details(trace_id):
         hole_figure = None
         if os.path.getsize(os.path.join(iosig_data_path, iorate_figures[i])) > 0:
             iorate_figure = iorate_figures[i]
-        if os.path.getsize(os.path.join(iosig_data_path, access_hole_figures[i])) > 0:
-            hole_figure = access_hole_figures[i]
+        #if os.path.getsize(os.path.join(iosig_data_path, access_hole_figures[i])) > 0:
+        #    hole_figure = access_hole_figures[i]
         figure_list.append((proc_info, iorate_figure, hole_figure))
     return render_template('iosig_details.html', trace_id=trace_id, figure_list=figure_list)
 
