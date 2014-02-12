@@ -24,7 +24,7 @@ __date__ = "$Date: 02/08/2014 $"
 __copyright__ = "Copyright (c) 2010-2014 SCS Lab, IIT"
 __license__ = "Python"
 
-import sys, os, string, getopt, gc
+import sys, os, string, getopt, gc, multiprocessing
 from access import *
 from accList import *
 from prop import *
@@ -71,12 +71,15 @@ def main(argv):
     # generate R/W bandwidth over time figures
     if len(sig._trace_path) > 0 and os.path.isdir(sig._trace_path):
         posix_traces = [ filename for filename in os.listdir(sig._trace_path) if filename.startswith('posix') ]
-        for single_trace in posix_traces:
-            generateCSVs(single_trace)
+        pool = multiprocessing.Pool()
+        pool.map(generateCSVs, posix_traces)
+        #for single_trace in posix_traces:
+        #    generateCSVs(single_trace)
     else:
         if len(sig._trace_file) > 0 and os.path.isfile(sig._trace_file):
             generateCSVs(sig._trace_file)
 
+    global_analysis()
     # detect patterns
     # and generates IO rates figure
     # detectSignature(filename)
@@ -312,9 +315,6 @@ def generateCSVs(single_trace_filename):
         # because it's handling 5000 lines each time
         if (len(rlist) > 0):
             output = os.path.join(sig._out_path, trace_filename + ".read.rate.csv")
-            print "out_path " + sig._out_path
-            print "trace_filename " + trace_filename
-            print "OOOOOOOutput: " + output
             rlist.toIORStep(output, 1) # 1 for read
             output = os.path.join(sig._out_path, trace_filename + ".read.hole.sizes.csv")
             rlist.toDataAccessHoleSizes(output)
@@ -358,9 +358,40 @@ def generateCSVs(single_trace_filename):
     f.write("total_read_count: {0}\n".format(total_read_count))
     f.write("total_write_time: {0}\n".format(total_write_time))
     f.write("total_write_count: {0}\n".format(total_write_count))
-    f.write("global_total_read_time: {0}\n".format(sig._total_read_time))
-    f.write("global_total_write_time: {0}\n".format(sig._total_write_time))
+    #f.write("global_total_read_time: {0}\n".format(sig._total_read_time))
+    #f.write("global_total_write_time: {0}\n".format(sig._total_write_time))
+
+def global_analysis():
+    """The methon analyzes the global statistics data."""
+    start_times = []
+    end_times = []
+    for exe_trace in [exe_trace for exe_trace in os.listdir(sig._trace_path) if exe_trace.startswith("exe")]:
+        print exe_trace
     
+        with open(exe_trace, 'r') as f:
+            first_line = f.readline()
+            if len(first_line) > 0:
+                words = first_line.split()
+                if len(words) > 3:
+                    start_times.append(float(words[3]))
+        with open(exe_trace, 'r') as f:
+            last_line = tail(f)
+            if len(last_line) > 0:
+                words = last_line[0].split()
+                if len(words) > 3:
+                    end_times.append(float(words[3]))
+
+    global_start_time = min(start_times)
+    global_end_time = max(end_times)
+    global_exe_time = global_end_time - global_start_time
+    
+    output = os.path.join(sig._out_path, "global.statistics.properties")
+    f = open(output, 'a+')
+    #f.write("global_start_time: {0}\n".format(global_start_time))
+    #f.write("global_end_time: {0}\n".format(global_end_time))
+    f.write("global_exe_time: {0}\n".format(global_end_time))
+    #print sig._out_path
+
 if __name__ == '__main__':
     main(sys.argv[1:])
     print '~ END ~'
