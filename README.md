@@ -1,4 +1,4 @@
-IOSIG software is a toolkit developed by Scalable Computing Software Lab at
+IOSIG software is a toolkit developed by [Scalable Computing Software Lab](http://http://www.cs.iit.edu/~scs) at
 Illinois Institute of Technology. In our research work, we designed and
 developed several performance optimization techniques for parallel I/O systems.
 Many of the techniques is application-aware that can utilize the I/O
@@ -17,6 +17,6 @@ See [INSTALL.md](https://github.com/yinyanlong/iosig/blob/master/INSTALL.md) for
 
 Contact:
 
-    - Yanlong Yin (yinyanlong@gmail.com)
-    - Xian-He Sun (sun@iit.edu)
+- Yanlong Yin (yinyanlong@gmail.com)
+- Xian-He Sun (sun@iit.edu)
 
