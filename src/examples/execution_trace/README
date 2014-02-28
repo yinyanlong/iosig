@@ -6,7 +6,7 @@ very simple. Please just read the test script "run_example.sh" and the code.
 Thanks.
 
 User guide on building the tracing library:
-http://code.google.com/p/iosig/wiki/userGuide.
+https://github.com/yinyanlong/iosig/blob/master/INSTALL.md
 
 -
 Yanlong Yin 01/20/2013
