@@ -10,7 +10,6 @@ characteristics, which works as follows:
 application.  
 2. The IOSIG trace analyzer analyzes the trace files and recognizes the data
 access patterns.
-
 3. The analysis results can be displayed using the browser-based dashboard.
 
 See [INSTALL.md](https://github.com/yinyanlong/iosig/blob/master/INSTALL.md) for how to install and use the software.
