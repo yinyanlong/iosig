@@ -1,6 +1,5 @@
 #!/bin/bash
 
-MPI_HOME     = /export/home/yyin/install
 CC           = mpicc
 
 EXECS        = example
