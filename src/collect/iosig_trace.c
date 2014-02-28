@@ -586,8 +586,11 @@ void global_init () {
         cmd = "unknown";
     } else {
         cmd = strrchr(rawcmd, '/');
+        if (cmd) {
+            cmd = cmd+1;
+        }
         if (!cmd) {
-            cmd = rawcmd;
+            cmd = rawcmd; /* No '/' is found in the rawcmd */
         }
     }
     
