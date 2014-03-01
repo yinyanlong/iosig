@@ -10,10 +10,9 @@
 
 /* Initialize log file  */
 void init_log(int rank) {
-    char filename_rank[25];
-    sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
-
-    out_fp = __real_fopen(filename_rank, "a");
+    char filename_mpiio[FILE_PATH_LENGTH];
+    get_trace_file_path_rank(filename_mpiio, TRACE_TYPE_MPIIO);
+    out_fp = __real_fopen(filename_mpiio, "a");
     if (!out_fp) {
         perror("Pointer to log file doesn't exist in init_log \n");
         exit(1);
@@ -54,9 +53,9 @@ void IOSIG_mpiio_write_log(iosig_mpiio_trace_record * pushio_rec) {
             rank = pushio_rec->mpi_rank;
         }
         /* TODO: consider removing the following 3 lines */
-        char filename_rank[30];
-        sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
-        out_fp = __real_fopen(filename_rank, "a");
+        char filename_mpiio[FILE_PATH_LENGTH];
+        get_trace_file_path_rank(filename_mpiio, TRACE_TYPE_MPIIO);
+        out_fp = __real_fopen(filename_mpiio, "a");
     }
     timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
@@ -89,9 +88,9 @@ void IOSIG_mpiio_write_log_with_path(iosig_mpiio_trace_record * pushio_rec, cons
             rank = pushio_rec->mpi_rank;
         }
         /* TODO: consider removing the following 3 lines */
-        char filename_rank[30];
-        sprintf(filename_rank, "mpiio_trace_rank-%d.out", rank);
-        out_fp = __real_fopen(filename_rank, "a");
+        char filename_mpiio[FILE_PATH_LENGTH];
+        get_trace_file_path_rank(filename_mpiio, TRACE_TYPE_MPIIO);
+        out_fp = __real_fopen(filename_mpiio, "a");
     }
     timeval_diff(&diffstart, &(pushio_rec->op_time), &bigbang);
     timeval_diff(&diffend, &(pushio_rec->op_end_time), &bigbang);
