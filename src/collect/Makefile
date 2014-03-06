@@ -1,4 +1,4 @@
-MPIPATH		= /mnt/common/kfeng/mpich2-1.5
+MPIPATH		= /home/yanlong/data/program_files/mpich2-1.4.1p1
 INSTALL_DIR	= /mnt/common/kfeng/IOSIG
 
 C_COMPILER	= gcc

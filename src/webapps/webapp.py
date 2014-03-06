@@ -1,6 +1,10 @@
-import os
-import datetime
-import string
+import os, sys, datetime, string
+
+iosig_home = os.getenv('IOSIG_HOME')
+lib_path = os.path.join(iosig_home, 'src', 'analysis')
+sys.path.append(lib_path)
+import prop
+from prop import *
 
 from flask import Flask
 from flask import render_template
@@ -32,7 +36,18 @@ def list_trace_dirs():
         user, separator, the_rest = directory.partition('_')
         ts_epoch, separator, exe_name = the_rest.partition('_')
         date_string = datetime.datetime.fromtimestamp(float(ts_epoch)).strftime('%Y-%m-%d %H:%M:%S')
-        dirs_list.append([user, date_string, exe_name, directory])
+        global_stat = Properties()
+        f_stat = open(os.path.join(iosig_data_path, directory, 'result_output', 'global.stat.properties'))
+        global_stat.load(f_stat)
+        
+        dirs_list.append(
+                (user, date_string, exe_name, directory, 
+                    round(float(global_stat['global_exe_time']), 6), 
+                    global_stat['global_read_count'], 
+                    round(float(global_stat['global_read_time_nonoverlap']), 6), 
+                    global_stat['global_write_count'], 
+                    round(float(global_stat['global_write_time_nonoverlap']), 6) )
+                )
 
     return render_template('iosig_list.html', list=dirs_list)
 

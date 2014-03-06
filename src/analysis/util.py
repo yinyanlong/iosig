@@ -52,3 +52,15 @@ def tail(f, window=1):
         bytes -= BUFSIZ
         block -= 1
     return ''.join(data).splitlines()[-window:]
+
+def merge_intervals(times):
+    saved = list(times[0])
+    for st, en in sorted([sorted(t) for t in times]):
+        if st <= saved[1]:
+            saved[1] = max(saved[1], en)
+        else:
+            yield tuple(saved)
+            saved[0] = st
+            saved[1] = en
+    yield tuple(saved)
+

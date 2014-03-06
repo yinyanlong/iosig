@@ -1,18 +1,28 @@
-body            { font-family: "Segoe UI Light", "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif; background: #eee; }
+body            { font-family: "Segoe UI", Frutiger, "Frutiger Linotype", "Dejavu Sans", "Helvetica Neue", Arial, sans-serif; background: #eee; }
 h1              { font-family: "Segoe UI"; border-bottom: 2px solid #eee; }
 h2              { font-size: 1.2em; }
+code            { font-family: Monaco, Consolas, "Lucida Console", monospace; font-size: 0.9em;}
 
-.container      { width: 700px; }
-.trace_entry    { width: 700px; float: left; border: 1px solid #eee; position: relative;}
-.trace_entry:hover    { border-top: 1px solid #666; border-bottom: 1px solid #666; background: #ccc; }
+.container      { border-spacing: 0px; border-collapse:collapse;}
+.trace_entry    { border: 0px; }
+.trace_entry:hover    { background: #ccc; }
 .trace_entry_user { margin: 0.1em; float: left; width: 100px; }
 .trace_entry_date { margin: 0.1em; float: left; width: 200px; }
-.trace_entry_app { margin: 0.1em; float: left; width: 350px; font-family: Monaco, Consolas, "Lucida Console", monospace; }
+.trace_entry_app { margin: 0.1em; float: left; width: 300px; font-family: Monaco, Consolas, "Lucida Console", monospace; }
+.trace_entry_stat { font-size: 0.8em; margin: 0.1em; float: left; width: 60px; }
 .trace_entry_fill {display:block; width:100%; height:100%; z-index:10; }
+.trace_info {padding: 0.1em 0.5em 0.1em 0.5em; }
 
-.table_header    { font-family: "Segoe UI"; width: 700px; color: #999; float: left;}
-.table_header_c3 { margin: 0.1em; float: left; width: 350px; }
+.table_header    { font-family: "Segoe UI"; color: #999; }
+.table_header_c3 { margin: 0.1em; float: left; width: 300px; }
 .proc_id         { display: inline-block; background: #555; color: #fff; padding: 0.2em; border-radius: 1em; margin: 0.2em; }
+.wordwrap { 
+    white-space: pre-wrap;      /* CSS3 */   
+    white-space: -moz-pre-wrap; /* Firefox */    
+    white-space: -pre-wrap;     /* Opera <7 */   
+    white-space: -o-pre-wrap;   /* Opera 7 */    
+    word-wrap: break-word;      /* IE */
+           }
 
 .page           { margin: 2em auto; width: 35em; border: 5px solid #ccc;
     padding: 0.8em; background: white; }

@@ -702,19 +702,34 @@ class AccList(list):
 
         plt.savefig(path+"/iorates.png")
 
-    def toIORStep(self, outputDataFile, theInteger):
-        """Generate the iorates figure"""
-        """ theInteger: 1 for read list, 2 for write list"""
+    def toIORStep(self, trace_filename, read_or_write):
+        """
+        Generate the iorates and io_intervals CSV files
+        Parameters:
+            - trace_filename
+            - read_or_write: 'r' for read, 'w' for write
+        """
 
-        debugPrint("Generating the time steps data, the ingeter: ", theInteger)
+        debugPrint("Generating the time steps data, mode: ", read_or_write)
+        if len(self) <=0:
+            return
 
+        if read_or_write == 'r':
+            io_rate_csv = os.path.join(sig._out_path, trace_filename + ".read.rate.csv")
+            io_interval_csv = os.path.join(sig._out_path, trace_filename + ".read.interval.csv")
+        else:
+            io_rate_csv = os.path.join(sig._out_path, trace_filename + ".write.rate.csv")
+            io_interval_csv = os.path.join(sig._out_path, trace_filename + ".write.interval.csv")
+        f_io_interval_csv = open(io_interval_csv, 'a+')
         endTime = 0
         peakRate = 0
         
         tuples = []
         opTime = 0.0
-        for i in range(len(self)):
-            acc = self[i]
+        #for i in range(len(self)):
+        for acc in self:
+            #acc = self[i]
+            f_io_interval_csv.write("{0},{1}\n".format(acc.startTime, acc.endTime))
             if acc.endTime > endTime:
                 endTime = acc.endTime
             opTime = acc.endTime-acc.startTime 
@@ -726,21 +741,33 @@ class AccList(list):
             oper = acc.startTime, acc.endTime, rate
             tuples.append(oper)
 
-        ops = get_rate_serie(tuples, 0, endTime)
+        ops = get_rate_serie(tuples, 0, endTime) # TODO: this endTime may be larger then the beginTime of next call to this function
 
-        f = open(outputDataFile, 'a+')
-        #f.write("Time,Rate\n")
+        f_io_rate_csv = open(io_rate_csv, 'a+')
         for op in ops:
-            f.write( "{0},{1}\n".format(op[0], op[2]) )
-            if op[2] > 0 and theInteger == 1:
-                sig._total_read_time += op[1]-op[0] 
-            if op[2] > 0 and theInteger == 2:
+            f_io_rate_csv.write( "{0},{1}\n".format(op[0], op[2]) )
+            if op[2] > 0 and read_or_write == 'r':
+                sig._total_read_time += op[1]-op[0]  # TODO: single vs global total_read_time
+            if op[2] > 0 and read_or_write == 'w':
                 sig._total_write_time += op[1]-op[0] 
 
-        f.close()
+        f_io_rate_csv.close()
+        f_io_interval_csv.close()
 
-    def toDataAccessHoleSizes(self, outputDataFile):
-        """Generate the CSV file for drawing access holes figure"""
+    def toDataAccessHoleSizes(self, trace_filename, read_or_write):
+        """
+        Generate the CSV file for drawing access holes figure.
+        Parameters:
+            - trace_filename
+            - read_or_write: 'r' for read, 'w' for write
+        """
+        if len(self) <=0:
+            return
+        if read_or_write == 'r':
+            outputDataFile = os.path.join(sig._out_path, trace_filename + ".read.hole.sizes.csv")
+        else:
+            outputDataFile = os.path.join(sig._out_path, trace_filename + ".write.hole.sizes.csv")
+
         f = open(outputDataFile, 'a+')
         lastFileCursor = self[0].pos
         for acc in self:
@@ -759,7 +786,6 @@ def get_rate_serie(op_tuples, start, end):
     new_tuples = []
 
     while True:
-        
         cursor = start
         for i in range(original_length):
             op = original_tuples[i]

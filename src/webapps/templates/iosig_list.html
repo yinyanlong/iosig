@@ -8,20 +8,30 @@
 
 {% if list %}
 <h4>Click application names for details.</h4>
-  <div class="container">
-  <div class="table_header">
-    <div class="trace_entry_user">USER</div>
-    <div class="trace_entry_date">DATE</div>
-    <div class="table_header_c3">APPLICATION</div>
-  </div>
+  <table class="container">
+  <tr class="table_header">
+    <td class="trace_info">USER</td>
+    <td class="trace_info">DATE</td>
+    <td class="trace_info">APPLICATION</td>
+    <td class="trace_info">EXE<br>TIME</td>
+    <td class="trace_info">READ<br>COUNT</td>
+    <td class="trace_info">READ<br>TIME</td>
+    <td class="trace_info">WRITE<br>COUNT</td>
+    <td class="trace_info">WRITE<br>TIME</td>
+  </tr>
   {% for dir in list %}
-  <div class="trace_entry">
-        <div class="trace_entry_user">{{ dir[0] }}</div>
-        <div class="trace_entry_date">{{ dir[1] }}</div>
-        <div class="trace_entry_app"><a href="/details/{{ dir[3] }}">{{ dir[2] }}</a></div>
-    </div>
+  <tr class="trace_entry">
+      <td class="trace_info">{{ dir[0] }}</td>
+      <td class="trace_info">{{ dir[1] }}</td>
+      <td class="trace_info"><a href="/details/{{ dir[3] }}"><code>{{ dir[2] }}</code></a></td>
+      <td class="trace_info">{{ dir[4] }}</td>
+      <td class="trace_info">{{ dir[5] }}</td>
+      <td class="trace_info">{{ dir[6] }}</td>
+      <td class="trace_info">{{ dir[7] }}</td>
+      <td class="trace_info">{{ dir[8] }}</td>
+    </tr>
   {% endfor %}
-</div>
+  </table>
 {% else %}
   <h4>No traces!</h4>
 {% endif %}
