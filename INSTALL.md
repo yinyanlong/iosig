@@ -60,7 +60,7 @@ command line. If you have difficulty on how to build your program, please check
 the examples following the instructions of last section.
 
     IOSIG_CFLAGS   = -w -finstrument-functions
-    IOSIG_LDFLAGS  = -L${IOSIG_HOME}/src/collect -liosig -Wl,-wrap,fopen,-wrap,fopen64,-wrap,fclose,-wrap,fread,-wrap,fwrite,-wrap,fseek,-wrap,open,-wrap,close,-wrap,read,-wrap,write,-wrap,lseek,-wrap,lseek64,-wrap,open64
+    IOSIG_LDFLAGS  = -Wl,-wrap,fopen,-wrap,fopen64,-wrap,fclose,-wrap,fread,-wrap,fwrite,-wrap,fseek,-wrap,open,-wrap,close,-wrap,read,-wrap,write,-wrap,lseek,-wrap,lseek64,-wrap,open64 -L${IOSIG_HOME}/src/collect -liosig 
 
 `IOSIG_CFLAGS` is to be added in the compiling stage. `IOSIG_LDFLAGS` is to be
 added in the link stage. Please check the examples for how to do this.
