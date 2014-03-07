@@ -12,7 +12,7 @@ application.
 access patterns.
 3. The analysis results can be displayed using the browser-based dashboard.
 
-See [INSTALL.md](https://github.com/yinyanlong/iosig/blob/master/INSTALL.md) for how to install and use the software.
+See [INSTALL.md](https://github.com/yinyanlong/iosig/blob/master/INSTALL.md) for how to install and use the software. For more examples on how to use IOSIG to profile parallel I/O benchmarks and applications, check the GitHub project: https://github.com/yinyanlong/profiling_parallel_io.
 
 Contact:
 
