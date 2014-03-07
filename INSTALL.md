@@ -65,6 +65,8 @@ the examples following the instructions of last section.
 `IOSIG_CFLAGS` is to be added in the compiling stage. `IOSIG_LDFLAGS` is to be
 added in the link stage. Please check the examples for how to do this.
 
+For more examples on how to use IOSIG to profile parallel I/O benchmarks and applications, check the GitHub project: https://github.com/yinyanlong/profiling_parallel_io.
+
 ## Using IOSIG analyzer
 
 In this current version, you need to run the analysis manually for each trace
