@@ -18,9 +18,7 @@ Markdown viewer or converted to a single-page HTML document.
     $ mkdir ~/.iosig/data
     $ export IOSIG_DATA=${HOME}/.iosig/data
 
-The variable `IOSIG_HOME` is used to locate the IOSIG tools, including the
-library and the analyzer. The variable `IOSIG_DATA` is used to store the trace
-file. 
+NOTE: we suggest you to add these two environmental variables to your `.bash_profile` or `.bash_rc` files. The variable `IOSIG_HOME` is used to locate the IOSIG tools, including the library and the analyzer. The variable `IOSIG_DATA` is used to store the trace file. 
 
 ## Compiling the trace library.
   
