@@ -3,6 +3,13 @@
 This file is written using Markdown. It can be viewed in a
 Markdown viewer or converted to a single-page HTML document.
 
+## Software dependencies
+
+- [MPICH2](http://www.mpich.org/), version 1.1.1p1 or newer
+- Python 2.6 or 2.7
+- [matplotlib](http://matplotlib.org/), version 1.0.0 or newer
+- [Flask](https://github.com/mitsuhiko/flask)
+
 ## Download IOSIG and setup the environment variables
 
     $ tar zxvf iosig-1.4.tar.gz
