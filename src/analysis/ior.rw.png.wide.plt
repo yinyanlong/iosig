@@ -17,7 +17,7 @@ set key autotitle columnhead
 #set ylabel "Bandwidth (MB\/s)"
 set xrange [0: ]
 set yrange [0: ]
-print trace.'.read.rate.csv'
+#print trace.'.read.rate.csv'
 plot trace.'.read.rate.csv' ls 1 title 'Read' with steps
 
 # plot write data
@@ -31,7 +31,7 @@ set style line 2 lt 1 lc rgb "blue"
 #set ylabel "Bandwidth (MB\/s)"
 set xrange [0: ]
 set yrange [0: ]
-print trace.'write.dat'
+#print trace.'write.dat'
 plot trace.'.write.rate.csv' ls 2 title 'Write' with steps
 
 unset multiplot

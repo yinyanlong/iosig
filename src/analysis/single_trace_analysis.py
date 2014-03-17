@@ -62,7 +62,8 @@ def detectSignature(filename):
         ## save to list
         op = words[op_index].upper();
         acc = Access(words)
-        accList.append(acc)
+        if acc.size >= 1:
+            accList.append(acc)
 
         if op.count('READ')>0 or op == 'R':
             debugPrint("one READ")
@@ -184,17 +185,18 @@ def generateCSVs(single_trace_filename):
             op = words[op_index].upper();
             acc = Access(words)
 
-            if op.count('READ')>0 or op == 'R':
-                debugPrint("one READ")
-                rlist.append(acc)
-                total_read_count += 1
-                total_read_time += acc.endTime - acc.startTime
+            if acc.size >= 1:
+                if op.count('READ')>0 or op == 'R':
+                    debugPrint("one READ")
+                    rlist.append(acc)
+                    total_read_count += 1
+                    total_read_time += acc.endTime - acc.startTime
 
-            if op.count('WRITE')>0 or op == 'W':
-                debugPrint("one WRITE")
-                wlist.append(acc)
-                total_write_count += 1
-                total_write_time += acc.endTime - acc.startTime
+                if op.count('WRITE')>0 or op == 'W':
+                    debugPrint("one WRITE")
+                    wlist.append(acc)
+                    total_write_count += 1
+                    total_write_time += acc.endTime - acc.startTime
         # finish reading a batch of 5000 lines of the trace file
 
         # Generate all kinds of CSV files using the rlist and wlist

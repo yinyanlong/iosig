@@ -69,13 +69,14 @@ def analyze_multiple_interval_csv(csvs):
     total_io_time_nonoverlap = 0.0
     for io_rate_csv in csvs:
         #print io_rate_csv
+        tmp_interval_list = []
         with open(os.path.join(sig._out_path, io_rate_csv), 'Ur') as f:
-            tmp_interval_list = list(tuple(rec) for rec in csv.reader(f, delimiter=','))
+            tmp_interval_list = list((float(rec['Begin']), float(rec['End'])) for rec in csv.DictReader(f, delimiter=','))
         if len(tmp_interval_list) <= 1:
             continue
         total_io_count += len(tmp_interval_list) - 1
-        total_io_time += sum([float(interval[1]) for interval in tmp_interval_list[1:]]) - sum([float(interval[0]) for interval in tmp_interval_list[1:]])
-        io_intervals += tmp_interval_list[1:]
+        total_io_time += sum([float(interval[1]) for interval in tmp_interval_list]) - sum([float(interval[0]) for interval in tmp_interval_list])
+        io_intervals += tmp_interval_list
         io_intervals.sort()
         io_intervals = list(merge_intervals(io_intervals))
     
