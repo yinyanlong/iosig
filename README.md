@@ -17,5 +17,6 @@ See [INSTALL.md](https://github.com/yinyanlong/iosig/blob/master/INSTALL.md) for
 Contact:
 
 - Yanlong Yin (yinyanlong@gmail.com)
+- Shuibing He (heshuibing@zju.edu.cn)
 - Xian-He Sun (sun@iit.edu)
 
